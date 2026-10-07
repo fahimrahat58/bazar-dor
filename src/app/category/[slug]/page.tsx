@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Product = {
@@ -57,7 +58,18 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }, [params]);
 
   const toBengaliNum = (num: number | string) => {
-    const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    const bengaliDigits = [
+      "০",
+      "১",
+      "২",
+      "৩",
+      "৪",
+      "৫",
+      "৬",
+      "৭",
+      "৮",
+      "৯",
+    ];
 
     return num
       .toString()
@@ -161,7 +173,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={(e) =>
+                setSortBy(e.target.value as SortOption)
+              }
               className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-bold text-gray-700 shadow-sm outline-none transition focus:border-[#008a48] focus:ring-1 focus:ring-[#008a48] sm:w-auto sm:flex-none sm:px-3 sm:py-1.5 sm:text-xs"
             >
               <option value="default">ডিফল্ট</option>
@@ -198,18 +212,21 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               const change = Number(product.change?.pct) || 0;
 
               return (
-                <div
+                <Link
                   key={product.id}
-                  className="flex min-w-0 flex-col justify-between rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4"
+                  href={`/products/${product.slug}`}
+                  className="group block min-w-0 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-green-100 hover:shadow-md active:scale-[0.99] sm:p-4"
                 >
                   {/* PRODUCT INFO */}
                   <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-50 text-lg sm:h-10 sm:w-10 sm:text-xl">
-                      {product.image || product.categoryIcon || "📦"}
+                      {product.image ||
+                        product.categoryIcon ||
+                        "📦"}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-black leading-tight text-gray-900 sm:text-base">
+                      <h3 className="truncate text-sm font-black leading-tight text-gray-900 transition-colors group-hover:text-green-700 sm:text-base">
                         {product.nameBn}
                       </h3>
 
@@ -235,7 +252,10 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                       </span>
 
                       <span className="whitespace-nowrap text-sm font-black text-gray-900 sm:text-base md:text-lg">
-                        {toBengaliNum(price.toLocaleString("en-US"))} টাকা
+                        {toBengaliNum(
+                          price.toLocaleString("en-US"),
+                        )}{" "}
+                        টাকা
                       </span>
                     </div>
 
@@ -257,10 +277,19 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                             : "—"}
                       </span>
 
-                      <span>{toBengaliNum(Math.abs(change))}%</span>
+                      <span>
+                        {toBengaliNum(Math.abs(change))}%
+                      </span>
                     </div>
                   </div>
-                </div>
+
+                  {/* DETAILS */}
+                  <div className="mt-2.5 flex justify-end">
+                    <span className="text-[10px] font-bold text-gray-400 transition-colors group-hover:text-green-600 sm:text-[11px]">
+                      বিস্তারিত দেখুন →
+                    </span>
+                  </div>
+                </Link>
               );
             })}
           </div>

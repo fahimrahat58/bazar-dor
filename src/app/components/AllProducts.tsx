@@ -1,0 +1,251 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+
+interface Market {
+  market: string;
+  division: string;
+  min: number;
+  max: number;
+}
+
+interface Product {
+  id: number;
+  slug: string;
+  nameBn: string;
+  category: string;
+  categoryNameBn: string;
+  categoryIcon: string;
+  unit: string;
+  image: string;
+  today: number;
+  yesterday: number;
+  lastWeek: number;
+  lastMonth: number;
+  change: {
+    dir: "up" | "down" | "flat";
+    pct: number;
+  };
+  markets: Market[];
+}
+
+type SortOption = "default" | "price-low" | "price-high";
+
+const toBengaliNumber = (num: number | string): string => {
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+
+  return num
+    .toString()
+    .replace(/\d/g, (digit) => bnDigits[parseInt(digit, 10)]);
+};
+
+const getUnitText = (unit: string): string => {
+  switch (unit.toLowerCase()) {
+    case "kg":
+      return "কেজি";
+
+    case "litre":
+      return "লিটার";
+
+    case "doz":
+    case "dozen":
+      return "ডজন";
+
+    case "piece":
+      return "পিস";
+
+    default:
+      return unit;
+  }
+};
+
+export default function AllProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedSort, setSelectedSort] =
+    useState<SortOption>("default");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(
+          "https://api.api-store.workers.dev/api/bazardor/products"
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data: Product[] = await res.json();
+
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          setProducts([]);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const sortedProducts = useMemo(() => {
+    const list = [...products];
+
+    switch (selectedSort) {
+      case "price-low":
+        return list.sort((a, b) => a.today - b.today);
+
+      case "price-high":
+        return list.sort((a, b) => b.today - a.today);
+
+      default:
+        return list;
+    }
+  }, [products, selectedSort]);
+
+  if (loading) {
+    return (
+      <section
+        id="all-products"
+        className="mx-auto w-full max-w-7xl scroll-mt-20 px-3 py-4 sm:px-5 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-7 xl:px-14"
+      >
+        <div className="mb-4 h-7 w-40 animate-pulse rounded-lg bg-gray-200" />
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="h-[125px] animate-pulse rounded-xl bg-gray-100"
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      id="all-products"
+      className="mx-auto w-full max-w-7xl scroll-mt-20 px-3 py-4 sm:px-5 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-7 xl:px-14"
+    >
+      {/* SECTION HEADER */}
+      <div className="mb-3.5 flex flex-col gap-2.5 sm:mb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <div>
+          <h2 className="text-sm font-black text-gray-900 sm:text-base md:text-lg lg:text-xl">
+            সব পণ্য
+          </h2>
+
+          <p className="mt-0.5 text-[9px] font-medium text-gray-500 sm:text-[10px] md:text-xs">
+            মোট {toBengaliNumber(sortedProducts.length)}টি পণ্য দেখানো হচ্ছে
+          </p>
+        </div>
+
+        {/* SORT */}
+        <div className="flex w-full items-center justify-between gap-2 text-[10px] font-medium text-gray-500 sm:w-auto sm:justify-end sm:text-xs">
+          <span>সাজান</span>
+
+          <select
+            value={selectedSort}
+            onChange={(e) =>
+              setSelectedSort(e.target.value as SortOption)
+            }
+            className="min-w-0 flex-1 cursor-pointer rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-gray-800 outline-none hover:border-gray-300 sm:w-auto sm:flex-none sm:px-2.5 sm:text-xs"
+          >
+            <option value="default">ডিফল্ট</option>
+            <option value="price-low">দাম: কম থেকে বেশি</option>
+            <option value="price-high">দাম: বেশি থেকে কম</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ALL PRODUCTS GRID */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
+        {sortedProducts.map((product) => {
+          const isUp = product.change?.dir === "up";
+          const isDown = product.change?.dir === "down";
+
+          return (
+            <Link
+              key={product.id}
+              href={`/products/${product.slug}`}
+              className="group block min-w-0"
+            >
+              <div className="flex min-w-0 flex-col justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-green-100 hover:shadow-md active:scale-[0.99] sm:p-3.5 md:p-4">
+                {/* TOP ROW */}
+                <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                  {/* PRODUCT ICON */}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f4f3] text-lg sm:h-11 sm:w-11 sm:text-xl md:h-12 md:w-12">
+                    {product.image || product.categoryIcon || "📦"}
+                  </div>
+
+                  {/* TITLE + UNIT */}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-xs font-bold leading-tight text-gray-900 transition-colors group-hover:text-[#008a48] sm:text-sm md:text-base">
+                      {product.nameBn}
+                    </h3>
+
+                    <p className="mt-0.5 truncate text-[9px] font-medium text-gray-400 sm:text-[10px] md:text-[11px]">
+                      প্রতি {getUnitText(product.unit)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* BOTTOM ROW */}
+                <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 sm:mt-4 sm:pt-3">
+                  {/* PRICE */}
+                  <div className="min-w-0">
+                    <span className="block text-[8px] font-medium text-gray-400 sm:text-[9px] md:text-[10px]">
+                      আজকের দাম
+                    </span>
+
+                    <div className="mt-0.5 flex min-w-0 items-baseline gap-1">
+                      <span className="truncate text-base font-black text-gray-900 sm:text-lg md:text-xl">
+                        {toBengaliNumber(product.today)}
+                      </span>
+
+                      <span className="shrink-0 text-[10px] font-semibold text-gray-800 sm:text-[11px] md:text-xs">
+                        টাকা
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* DYNAMIC BADGE */}
+                  <div
+                    className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-bold sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px] ${
+                      isUp
+                        ? "bg-[#fdf2f2] text-[#d9383a]"
+                        : isDown
+                          ? "bg-[#eef7f2] text-[#008a48]"
+                          : "bg-[#f3f4f6] text-gray-500"
+                    }`}
+                  >
+                    {isUp &&
+                      `▲ ${toBengaliNumber(
+                        Math.abs(product.change?.pct || 0)
+                      )}%`}
+
+                    {isDown &&
+                      `▼ ${toBengaliNumber(
+                        Math.abs(product.change?.pct || 0)
+                      )}%`}
+
+                    {!isUp &&
+                      !isDown &&
+                      `— ${toBengaliNumber(0)}%`}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}

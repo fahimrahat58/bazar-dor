@@ -54,7 +54,7 @@ const getUnitText = (unit: string): string => {
   }
 };
 
-export default function PriceUpProducts() {
+export default function PriceDownProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -65,18 +65,14 @@ export default function PriceUpProducts() {
           "https://api.api-store.workers.dev/api/bazardor/products",
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
         const data: Product[] = await res.json();
 
-        const top6UpProducts = data
-          .filter((item) => item.change?.dir === "up")
-          .sort((a, b) => b.change.pct - a.change.pct)
+        const top6DownProducts = data
+          .filter((item) => item.change?.dir === "down")
+          .sort((a, b) => Math.abs(b.change.pct) - Math.abs(a.change.pct))
           .slice(0, 6);
 
-        setProducts(top6UpProducts);
+        setProducts(top6DownProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -112,10 +108,12 @@ export default function PriceUpProducts() {
     <section className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-5 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-7 xl:px-14">
       {/* SECTION HEADER */}
       <div className="mb-3.5 flex items-center gap-1.5 sm:mb-4 sm:gap-2">
-        <span className="text-sm text-red-500 sm:text-base md:text-lg">▲</span>
+        <span className="text-sm text-emerald-600 sm:text-base md:text-lg">
+          ▼
+        </span>
 
         <h2 className="text-sm font-black text-gray-900 sm:text-base md:text-lg lg:text-xl">
-          আজ দাম বেড়েছে
+          আজ দাম কমেছে
         </h2>
       </div>
 
@@ -166,9 +164,9 @@ export default function PriceUpProducts() {
                   </div>
                 </div>
 
-                {/* PERCENTAGE BADGE */}
-                <div className="inline-flex shrink-0 items-center rounded-full bg-[#f4f7f4] px-2 py-0.5 text-[9px] font-bold text-[#d9383a] sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px]">
-                  ▲ {toBengaliNumber(Math.abs(product.change.pct))}%
+                {/* GREEN BADGE */}
+                <div className="inline-flex shrink-0 items-center rounded-full bg-[#eef7f2] px-2 py-0.5 text-[9px] font-bold text-[#008a48] sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px]">
+                  ▼ {toBengaliNumber(Math.abs(product.change.pct))}%
                 </div>
               </div>
             </div>
