@@ -2,34 +2,61 @@
 
 import React, { useEffect, useState } from "react";
 
+type Product = {
+  id: number;
+  nameBn: string;
+  image?: string;
+  categoryIcon?: string;
+  today: number;
+  unit: string;
+  change?: {
+    dir: "up" | "down" | "flat";
+    pct: number;
+  };
+};
+
 const ProductMarquee = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://api.api-store.workers.dev/api/bazardor/products")
-      .then((res) => res.json())
-      .then((data) => {
-        const productList = Array.isArray(data) ? data : data.products || [];
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(
+          "https://api.api-store.workers.dev/api/bazardor/products",
+        );
+
+        const data = await response.json();
+
+        const productList = Array.isArray(data)
+          ? data
+          : data.products || [];
+
         setProducts(productList);
+      } catch (error) {
+        console.error("Error fetching marquee data:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching marquee data:", err);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   if (loading) {
     return (
-      <div className="w-full bg-slate-50 border-y border-slate-200 py-2 sm:py-2.5 text-center text-slate-500 text-xs sm:text-sm">
+      <div className="w-full border-y border-slate-200 bg-slate-50 px-3 py-2 text-center text-[10px] text-slate-500 sm:px-4 sm:py-2.5 sm:text-xs md:text-sm">
         আজকের বাজার দর লোড হচ্ছে...
       </div>
     );
   }
 
+  if (products.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="w-full bg-slate-50 border-y border-slate-200 py-2 sm:py-2.5 overflow-hidden select-none">
+    <div className="w-full overflow-hidden border-y border-slate-200 bg-slate-50 py-2 select-none sm:py-2.5 md:py-3">
       <div className="inline-flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused]">
         {products.concat(products).map((item, index) => {
           const isUp = item.change?.dir === "up";
@@ -41,19 +68,26 @@ const ProductMarquee = () => {
               key={`${item.id}-${index}`}
               className="
                 inline-flex
+                shrink-0
                 items-center
-                gap-1 sm:gap-1.5 md:gap-2
-                mx-3 sm:mx-4 md:mx-6
-                text-xs sm:text-sm
-                text-slate-700
+                gap-1
+                mx-2.5
+                text-[10px]
                 font-medium
+                text-slate-700
+                sm:gap-1.5
+                sm:mx-4
+                sm:text-xs
+                md:gap-2
+                md:mx-5
+                md:text-sm
               "
             >
-              <span className="text-sm sm:text-base leading-none">
+              <span className="text-xs leading-none sm:text-sm md:text-base">
                 {item.image || item.categoryIcon || "🛒"}
               </span>
 
-              <span className="text-slate-900 font-semibold">
+              <span className="font-semibold text-slate-900">
                 {item.nameBn}
               </span>
 
@@ -63,7 +97,7 @@ const ProductMarquee = () => {
 
               {item.change?.dir !== "flat" && (
                 <span
-                  className={`inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-bold ${
+                  className={`inline-flex items-center gap-0.5 text-[9px] font-bold sm:text-[10px] md:text-xs ${
                     isUp
                       ? "text-red-600"
                       : isDown
