@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { signIn } from "@/app/lib/auth-client";
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -11,12 +12,17 @@ export default function SignInPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [githubLoading, setGithubLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!formData.email.trim()) {
@@ -36,29 +42,63 @@ export default function SignInPage() {
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const { data: resData, error } = await signIn.email({
+        email: formData.email.trim(),
+        password: formData.password,
+        rememberMe: true,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
+        return;
+      }
+
+      if (resData) {
+        toast.success("সফলভাবে সাইন ইন হয়েছে!");
+
+        setFormData({
+          email: "",
+          password: "",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("সাইন ইন করতে সমস্যা হয়েছে");
+    } finally {
       setLoading(false);
-      toast.success("সফলভাবে সাইন ইন হয়েছে!");
-      setFormData({ email: "", password: "" });
-    }, 1200);
+    }
   };
 
-  const handleGoogleSignIn = () => {
-    toast.loading("Google সাইন ইন করা হচ্ছে...");
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
 
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success("Google দিয়ে সফলভাবে সাইন ইন করা হয়েছে");
-    }, 1500);
+    try {
+      await signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+      setGoogleLoading(false);
+    }
   };
 
-  const handleGitHubSignIn = () => {
-    toast.loading("GitHub সাইন ইন করা হচ্ছে...");
+  const handleGitHubSignIn = async () => {
+    setGithubLoading(true);
 
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success("GitHub দিয়ে সফলভাবে সাইন ইন করা হয়েছে");
-    }, 1500);
+    try {
+      await signIn.social({
+        provider: "github",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+      setGithubLoading(false);
+    }
   };
 
   return (
@@ -91,7 +131,8 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1.5 block h-10 w-full min-w-0 cursor-pointer rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 sm:h-11 sm:px-3.5 sm:text-sm"
+                disabled={loading}
+                className="mt-1.5 block h-10 w-full min-w-0 cursor-pointer rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:cursor-not-allowed disabled:bg-gray-50 sm:h-11 sm:px-3.5 sm:text-sm"
               />
             </div>
 
@@ -110,7 +151,8 @@ export default function SignInPage() {
                 placeholder="কমপক্ষে ৮ অক্ষর"
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1.5 block h-10 w-full min-w-0 cursor-pointer rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 sm:h-11 sm:px-3.5 sm:text-sm"
+                disabled={loading}
+                className="mt-1.5 block h-10 w-full min-w-0 cursor-pointer rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:cursor-not-allowed disabled:bg-gray-50 sm:h-11 sm:px-3.5 sm:text-sm"
               />
             </div>
 
@@ -137,48 +179,58 @@ export default function SignInPage() {
             <button
               onClick={handleGoogleSignIn}
               type="button"
-              className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] sm:h-11"
+              disabled={googleLoading || githubLoading}
+              className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
             >
               <svg
-                className="h-4 w-4 shrink-0"
                 viewBox="0 0 24 24"
+                className="h-4 w-4 shrink-0 sm:h-[18px] sm:w-[18px]"
                 aria-hidden="true"
               >
                 <path
                   fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3.01h3.87c2.27-2.09 3.56-5.17 3.56-8.66Z"
                 />
                 <path
                   fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3.01c-1.07.72-2.44 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.95H1.27v3.1A12 12 0 0 0 12 24Z"
                 />
                 <path
                   fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28v-3.1H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38l4-3.1Z"
                 />
                 <path
                   fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  d="M12 4.77c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.94 1.15 15.24 0 12 0A12 12 0 0 0 1.27 6.62l4 3.1C6.22 6.88 8.87 4.77 12 4.77Z"
                 />
               </svg>
 
-              <span className="truncate">Google দিয়ে চালিয়ে যান</span>
+              <span className="truncate">
+                {googleLoading
+                  ? "Google দিয়ে সাইন ইন হচ্ছে..."
+                  : "Google দিয়ে চালিয়ে যান"}
+              </span>
             </button>
 
             <button
               onClick={handleGitHubSignIn}
               type="button"
-              className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] sm:h-11"
+              disabled={googleLoading || githubLoading}
+              className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
             >
               <svg
-                className="h-4 w-4 shrink-0 fill-current text-gray-900"
                 viewBox="0 0 24 24"
+                className="h-4 w-4 shrink-0 fill-[#181717] sm:h-[18px] sm:w-[18px]"
                 aria-hidden="true"
               >
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                <path d="M12 .3a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.84 1.23 1.84 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .3Z" />
               </svg>
 
-              <span className="truncate">GitHub দিয়ে চালিয়ে যান</span>
+              <span className="truncate">
+                {githubLoading
+                  ? "GitHub দিয়ে সাইন ইন হচ্ছে..."
+                  : "GitHub দিয়ে চালিয়ে যান"}
+              </span>
             </button>
           </div>
 
