@@ -66,10 +66,17 @@ export default function AllProducts() {
   const [selectedSort, setSelectedSort] = useState<SortOption>("default");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchProducts = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch(
           "https://api.api-store.workers.dev/api/bazardor/products",
+          {
+            signal: controller.signal,
+          },
         );
 
         if (!res.ok) {
@@ -84,14 +91,20 @@ export default function AllProducts() {
           setProducts([]);
         }
       } catch (error) {
-        console.error("Error fetching products:", error);
-        setProducts([]);
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Error fetching products:", error);
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
+
+    return () => controller.abort();
   }, []);
 
   const sortedProducts = useMemo(() => {
@@ -115,14 +128,56 @@ export default function AllProducts() {
         id="all-products"
         className="mx-auto w-full max-w-7xl scroll-mt-20 px-3 py-4 sm:px-5 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-7 xl:px-14"
       >
-        <div className="mb-4 h-7 w-32 animate-pulse rounded-lg bg-gray-200 sm:w-40" />
+        <div className="mb-3.5 flex flex-col gap-2.5 sm:mb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3 md:mb-5">
+          <div className="min-w-0">
+            <div className="h-5 w-20 animate-pulse rounded-md bg-gray-200 sm:h-6 sm:w-24 md:h-7 md:w-28" />
+
+            <div className="mt-2 h-3 w-36 animate-pulse rounded bg-gray-100 sm:w-44" />
+          </div>
+
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+            <div className="h-3 w-8 animate-pulse rounded bg-gray-100" />
+
+            <div className="h-9 w-full animate-pulse rounded-lg bg-gray-100 sm:h-8 sm:w-40" />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+          {Array.from({ length: 6 }).map((_, index) => (
             <div
-              key={i}
-              className="h-[125px] animate-pulse rounded-xl border border-gray-100 bg-gray-100 sm:h-[135px] sm:rounded-2xl"
-            />
+              key={index}
+              className="min-w-0 rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-3.5 md:p-4"
+            >
+              <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-gray-200 sm:h-11 sm:w-11 sm:rounded-xl md:h-12 md:w-12" />
+
+                <div className="min-w-0 flex-1">
+                  <div
+                    className="h-3.5 animate-pulse rounded bg-gray-200 sm:h-4 md:h-5"
+                    style={{
+                      width:
+                        index % 3 === 0
+                          ? "65%"
+                          : index % 2 === 0
+                            ? "78%"
+                            : "55%",
+                    }}
+                  />
+
+                  <div className="mt-2 h-2.5 w-20 animate-pulse rounded bg-gray-100 sm:h-3 sm:w-24" />
+                </div>
+              </div>
+
+              <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 sm:mt-4 sm:pt-3">
+                <div className="min-w-0 flex-1">
+                  <div className="h-2.5 w-16 animate-pulse rounded bg-gray-100 sm:h-3 sm:w-20" />
+
+                  <div className="mt-2 h-5 w-24 animate-pulse rounded bg-gray-200 sm:h-6 sm:w-28 md:h-7 md:w-32" />
+                </div>
+
+                <div className="h-6 w-14 shrink-0 animate-pulse rounded-full bg-gray-100 sm:h-7 sm:w-16" />
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -172,7 +227,6 @@ export default function AllProducts() {
               className="group block min-w-0 rounded-xl outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[#008a48]/20 sm:rounded-2xl"
             >
               <div className="flex min-w-0 flex-col justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-green-200 group-hover:shadow-[0_8px_24px_rgba(0,138,72,0.10)] group-focus-visible:border-green-300 group-active:translate-y-0 group-active:scale-[0.99] sm:rounded-2xl sm:p-3.5 md:p-4">
-                {/* TOP ROW */}
                 <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f4f3] text-lg transition-all duration-300 group-hover:bg-green-50 group-hover:scale-105 sm:h-11 sm:w-11 sm:rounded-xl sm:text-xl md:h-12 md:w-12">
                     {product.image || product.categoryIcon || "📦"}

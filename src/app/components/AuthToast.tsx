@@ -9,6 +9,17 @@ export default function AuthToast() {
 
     const params = new URLSearchParams(window.location.search);
     const authType = params.get("auth");
+    const message = params.get("message");
+
+    if (message === "login-required") {
+      toast.error("এই পেজটি দেখতে আগে সাইন ইন করুন!", {
+        duration: 3000,
+      });
+
+      window.history.replaceState({}, "", "/sign-in");
+
+      return;
+    }
 
     if (authSuccess) {
       sessionStorage.removeItem("auth-success");

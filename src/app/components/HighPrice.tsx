@@ -63,10 +63,17 @@ export default function PriceUpProducts() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchProducts = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch(
           "https://api.api-store.workers.dev/api/bazardor/products",
+          {
+            signal: controller.signal,
+          },
         );
 
         if (!res.ok) {
@@ -82,26 +89,67 @@ export default function PriceUpProducts() {
 
         setProducts(top6UpProducts);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Error fetching products:", error);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
+
+    return () => controller.abort();
   }, []);
 
   if (loading) {
     return (
       <section className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-5 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-7 xl:px-14">
-        <div className="mb-4 h-7 w-32 animate-pulse rounded-lg bg-gray-200 sm:w-40" />
+        <div className="mb-3.5 flex items-center gap-1.5 sm:mb-4 sm:gap-2 md:mb-5">
+          <div className="h-4 w-4 animate-pulse rounded bg-red-100 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+
+          <div className="h-5 w-28 animate-pulse rounded-md bg-gray-200 sm:h-6 sm:w-36 md:h-7 md:w-40" />
+        </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+          {Array.from({ length: 6 }).map((_, index) => (
             <div
-              key={i}
-              className="h-[125px] animate-pulse rounded-xl border border-gray-100 bg-gray-100 sm:h-[135px] sm:rounded-2xl"
-            />
+              key={index}
+              className="min-w-0 rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-3.5 md:p-4"
+            >
+              <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                {/* Product Icon */}
+                <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-gray-200 sm:h-11 sm:w-11 sm:rounded-xl md:h-12 md:w-12" />
+
+                <div className="min-w-0 flex-1">
+                  <div
+                    className="h-3.5 animate-pulse rounded bg-gray-200 sm:h-4 md:h-5"
+                    style={{
+                      width:
+                        index % 3 === 0
+                          ? "65%"
+                          : index % 2 === 0
+                            ? "78%"
+                            : "55%",
+                    }}
+                  />
+
+                  <div className="mt-2 h-2.5 w-20 animate-pulse rounded bg-gray-100 sm:h-3 sm:w-24" />
+                </div>
+              </div>
+
+              <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 sm:mt-4 sm:pt-3">
+                <div className="min-w-0 flex-1">
+                  <div className="h-2.5 w-16 animate-pulse rounded bg-gray-100 sm:h-3 sm:w-20" />
+
+                  <div className="mt-2 h-5 w-24 animate-pulse rounded bg-gray-200 sm:h-6 sm:w-28 md:h-7 md:w-32" />
+                </div>
+
+                <div className="h-6 w-14 shrink-0 animate-pulse rounded-full bg-red-50 sm:h-7 sm:w-16" />
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -114,7 +162,6 @@ export default function PriceUpProducts() {
 
   return (
     <section className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-5 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-7 xl:px-14">
-      {/* SECTION HEADER */}
       <div className="mb-3.5 flex items-center gap-1.5 sm:mb-4 sm:gap-2 md:mb-5">
         <span className="text-sm text-red-500 sm:text-base md:text-lg">▲</span>
 

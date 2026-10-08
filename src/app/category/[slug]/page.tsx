@@ -98,6 +98,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         if (data.length > 0) {
           setCategoryName(data[0].categoryNameBn || "");
           setCategoryIcon(data[0].categoryIcon || "");
+        } else {
+          setCategoryName("");
+          setCategoryIcon("");
         }
       } catch (error: any) {
         if (error.name !== "AbortError") {
@@ -148,7 +151,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           </div>
         </div>
 
-        {/* Filter / Sort */}
         <div className="mb-4 flex min-w-0 flex-col gap-2.5 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <span className="shrink-0 text-[11px] font-bold text-gray-600 sm:text-xs md:text-sm">
             মোট {toBengaliNum(products.length)}টি পণ্য দেখানো হচ্ছে
@@ -171,14 +173,38 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           </div>
         </div>
 
-        {/* Products */}
         {loading ? (
-          <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="h-28 min-w-0 animate-pulse rounded-xl border border-gray-100 bg-white p-4 sm:h-32 sm:rounded-2xl"
-              />
+                className="min-w-0 w-full rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm sm:rounded-2xl sm:p-4 md:p-4.5"
+              >
+                <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
+                  {/* Icon */}
+                  <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-gray-200 sm:h-10 sm:w-10 sm:rounded-xl" />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200 sm:h-5" />
+
+                    <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-gray-100" />
+                  </div>
+                </div>
+
+                <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 sm:mt-4 sm:pt-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="h-2.5 w-16 animate-pulse rounded bg-gray-100 sm:h-3" />
+
+                    <div className="mt-2 h-5 w-28 animate-pulse rounded bg-gray-200 sm:h-6" />
+                  </div>
+
+                  <div className="h-6 w-14 shrink-0 animate-pulse rounded-md bg-gray-100 sm:h-7 sm:w-16" />
+                </div>
+
+                <div className="mt-2.5 flex justify-end sm:mt-3">
+                  <div className="h-3 w-20 animate-pulse rounded bg-gray-100 sm:h-3.5 sm:w-24" />
+                </div>
+              </div>
             ))}
           </div>
         ) : sortedProducts.length === 0 ? (

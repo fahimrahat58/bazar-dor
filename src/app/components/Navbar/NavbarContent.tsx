@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ChevronDown,
-  LogOut,
-  Menu,
-  ShoppingCart,
-  User,
-  X,
-} from "lucide-react";
+import { ChevronDown, LogOut, Menu, ShoppingCart, User, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -26,7 +19,6 @@ const CATEGORY_API =
 
 export default function NavbarContent() {
   const pathname = usePathname();
-
   const { data: session, isPending } = useSession();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -36,18 +28,17 @@ export default function NavbarContent() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const userDropdownRef = useRef<HTMLDivElement>(null);
-
   const user = session?.user;
 
-  const getInitial = (name?: string) => {
-    return name ? name.charAt(0).toUpperCase() : "U";
-  };
+  const getInitial = (name?: string) => name?.charAt(0).toUpperCase() || "U";
 
   useEffect(() => {
     const controller = new AbortController();
 
-    const fetchCategories = async () => {
+    async function fetchCategories() {
       try {
+        setLoading(true);
+
         const response = await fetch(CATEGORY_API, {
           signal: controller.signal,
         });
@@ -65,40 +56,41 @@ export default function NavbarContent() {
         } else {
           setCategories([]);
         }
-      } catch (error: unknown) {
+      } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
           console.error("Category fetch error:", error);
+          setCategories([]);
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
-    };
+    }
 
     fetchCategories();
 
-    const today = new Date();
-
-    const formattedDate = new Intl.DateTimeFormat("bn-BD", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(today);
-
-    setCurrentDate(formattedDate);
+    setCurrentDate(
+      new Intl.DateTimeFormat("bn-BD", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date()),
+    );
 
     return () => controller.abort();
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    function handleClickOutside(event: MouseEvent) {
       if (
         userDropdownRef.current &&
         !userDropdownRef.current.contains(event.target as Node)
       ) {
         setUserDropdownOpen(false);
       }
-    };
+    }
 
     document.addEventListener("mousedown", handleClickOutside);
 
@@ -112,7 +104,7 @@ export default function NavbarContent() {
     setUserDropdownOpen(false);
   }, [pathname]);
 
-  const handleSignOut = async () => {
+  async function handleSignOut() {
     const toastId = toast.loading("সাইন আউট করা হচ্ছে...");
 
     try {
@@ -125,38 +117,37 @@ export default function NavbarContent() {
             setUserDropdownOpen(false);
             setMobileMenu(false);
 
-            setTimeout(() => {
-              window.location.href = "/";
-            }, 500);
+            window.location.href = "/";
           },
-
           onError: (context) => {
             toast.dismiss(toastId);
-
             toast.error(
-              context.error?.message || "সাইন আউট করতে সমস্যা হয়েছে"
+              context.error?.message || "সাইন আউট করতে সমস্যা হয়েছে",
             );
           },
         },
       });
     } catch (error) {
       console.error("Sign out error:", error);
-
       toast.dismiss(toastId);
       toast.error("সাইন আউট করতে সমস্যা হয়েছে");
     }
-  };
+  }
 
-  const getCategoryUrl = (slug: string) => {
-    return `/category/${encodeURIComponent(slug)}`;
-  };
+  const getCategoryUrl = (slug: string) =>
+    `/category/${encodeURIComponent(slug)}`;
 
-  const isCategoryActive = (slug: string) => {
-    return pathname === getCategoryUrl(slug);
-  };
+  const isCategoryActive = (slug: string) => pathname === getCategoryUrl(slug);
+
+  const categoryClass = (isActive: boolean) =>
+    `group flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-bold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#008a48]/15 xl:px-3 xl:text-[13px] ${
+      isActive
+        ? "bg-[#008a48] text-white shadow-sm"
+        : "text-gray-800 hover:bg-green-50 hover:text-[#008a48]"
+    }`;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
+    <div className="w-full border-b border-gray-100 bg-white">
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-5 md:px-7 lg:px-10 xl:px-14">
         <div className="flex min-h-[56px] items-center justify-between gap-3 sm:min-h-[60px] md:min-h-[64px]">
           <Link
@@ -187,20 +178,17 @@ export default function NavbarContent() {
 
           <div className="hidden items-center gap-1 lg:flex lg:gap-1.5">
             {isPending ? (
-              <div className="flex items-center gap-2 px-2 py-1.5">
-                <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gray-100">
-                  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                </div>
-
-                <div className="relative h-4 w-20 overflow-hidden rounded bg-gray-100">
-                  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                </div>
+              <div className="flex items-center gap-2 rounded-full px-2 py-1.5">
+                <div className="h-7 w-7 animate-pulse rounded-full bg-gray-200" />
+                <div className="h-3.5 w-20 animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-3 animate-pulse rounded bg-gray-100" />
               </div>
             ) : user ? (
               <div className="relative" ref={userDropdownRef}>
                 <button
                   type="button"
-                  onClick={() => setUserDropdownOpen((prev) => !prev)}
+                  onClick={() => setUserDropdownOpen((previous) => !previous)}
+                  aria-expanded={userDropdownOpen}
                   className="flex items-center gap-2 rounded-full px-2 py-1 transition-all duration-200 hover:bg-gray-50"
                 >
                   {user.image ? (
@@ -215,7 +203,7 @@ export default function NavbarContent() {
                     </div>
                   )}
 
-                  <span className="text-sm font-semibold text-gray-800">
+                  <span className="max-w-36 truncate text-sm font-semibold text-gray-800">
                     {user.name || "User"}
                   </span>
 
@@ -227,7 +215,7 @@ export default function NavbarContent() {
                 </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-gray-100/80 bg-white p-4 shadow-xl shadow-black/5">
+                  <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-xl shadow-black/5">
                     <div className="mb-3 flex items-center gap-3 px-1">
                       {user.image ? (
                         <img
@@ -245,7 +233,6 @@ export default function NavbarContent() {
                         <p className="truncate text-sm font-semibold text-gray-700">
                           {user.name || "User"}
                         </p>
-
                         <p className="truncate text-xs text-gray-400">
                           {user.email}
                         </p>
@@ -267,7 +254,7 @@ export default function NavbarContent() {
                         onClick={handleSignOut}
                         className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50/50"
                       >
-                        <LogOut className="h-4 w-4 text-red-500" />
+                        <LogOut className="h-4 w-4" />
                         সাইন আউট
                       </button>
                     </div>
@@ -295,9 +282,9 @@ export default function NavbarContent() {
 
           <button
             type="button"
-            onClick={() => setMobileMenu((prev) => !prev)}
+            onClick={() => setMobileMenu((previous) => !previous)}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-700 transition-all duration-200 hover:bg-green-50 hover:text-[#008a48] focus:outline-none focus:ring-2 focus:ring-[#008a48]/15 active:scale-95 sm:h-10 sm:w-10 lg:hidden"
-            aria-label="Toggle Menu"
+            aria-label={mobileMenu ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenu}
           >
             {mobileMenu ? (
@@ -313,10 +300,13 @@ export default function NavbarContent() {
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-5 md:px-7 lg:px-10 xl:px-14">
           <nav className="scrollbar-none flex h-[42px] items-center gap-1 overflow-x-auto">
             {loading ? (
-              Array.from({ length: 7 }).map((_, index) => (
+              Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="h-7 w-16 shrink-0 animate-pulse rounded-md bg-gray-100"
+                  className="h-7 shrink-0 animate-pulse rounded-md bg-gray-100"
+                  style={{
+                    width: `${index % 3 === 0 ? 72 : index % 2 === 0 ? 64 : 80}px`,
+                  }}
                 />
               ))
             ) : categories.length === 0 ? (
@@ -324,28 +314,19 @@ export default function NavbarContent() {
                 কোনো ক্যাটাগরি পাওয়া যায়নি
               </span>
             ) : (
-              categories.map((category) => {
-                const categoryUrl = getCategoryUrl(category.slug);
-                const isActive = isCategoryActive(category.slug);
+              categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={getCategoryUrl(category.slug)}
+                  className={categoryClass(isCategoryActive(category.slug))}
+                >
+                  <span className="text-sm leading-none transition-transform duration-200 group-hover:scale-105 xl:text-[15px]">
+                    {category.icon}
+                  </span>
 
-                return (
-                  <Link
-                    key={category.id}
-                    href={categoryUrl}
-                    className={`group flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-bold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#008a48]/15 xl:px-3 xl:text-[13px] ${
-                      isActive
-                        ? "bg-[#008a48] text-white shadow-sm"
-                        : "text-gray-800 hover:bg-green-50 hover:text-[#008a48]"
-                    }`}
-                  >
-                    <span className="text-sm leading-none transition-transform duration-200 group-hover:scale-105 xl:text-[15px]">
-                      {category.icon}
-                    </span>
-
-                    <span>{category.nameBn}</span>
-                  </Link>
-                );
-              })
+                  <span>{category.nameBn}</span>
+                </Link>
+              ))
             )}
           </nav>
         </div>
@@ -354,13 +335,21 @@ export default function NavbarContent() {
       {mobileMenu && (
         <div className="border-t border-gray-100 bg-white shadow-md lg:hidden">
           <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-5 sm:py-3.5 md:px-7">
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 md:grid-cols-4">
+            <nav className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 md:grid-cols-4">
               {loading ? (
                 Array.from({ length: 8 }).map((_, index) => (
                   <div
                     key={index}
-                    className="h-10 animate-pulse rounded-md bg-gray-100 sm:h-11"
-                  />
+                    className="flex min-h-[42px] animate-pulse items-center gap-2 rounded-lg bg-gray-100 px-2.5 py-2 sm:min-h-[44px] sm:px-3"
+                  >
+                    <div className="h-5 w-5 shrink-0 rounded bg-gray-200" />
+                    <div
+                      className="h-3 rounded bg-gray-200"
+                      style={{
+                        width: `${index % 3 === 0 ? 52 : index % 2 === 0 ? 44 : 60}px`,
+                      }}
+                    />
+                  </div>
                 ))
               ) : categories.length === 0 ? (
                 <span className="col-span-full py-2 text-center text-xs font-medium text-gray-400">
@@ -368,13 +357,12 @@ export default function NavbarContent() {
                 </span>
               ) : (
                 categories.map((category) => {
-                  const categoryUrl = getCategoryUrl(category.slug);
                   const isActive = isCategoryActive(category.slug);
 
                   return (
                     <Link
                       key={category.id}
-                      href={categoryUrl}
+                      href={getCategoryUrl(category.slug)}
                       onClick={() => setMobileMenu(false)}
                       className={`group flex min-h-[42px] items-center gap-1.5 rounded-lg px-2.5 py-2 text-[11px] font-bold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#008a48]/15 sm:min-h-[44px] sm:px-3 sm:text-xs ${
                         isActive
@@ -391,24 +379,18 @@ export default function NavbarContent() {
                   );
                 })
               )}
-            </div>
+            </nav>
 
+            {/* Mobile User Section */}
             <div className="mt-3 border-t border-gray-100 pt-3 sm:mt-3.5 sm:pt-3.5">
               {isPending ? (
                 <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
-                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                    </div>
+                    <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-gray-200" />
 
-                    <div className="flex-1 space-y-2">
-                      <div className="relative h-3.5 w-28 overflow-hidden rounded bg-gray-200">
-                        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                      </div>
-
-                      <div className="relative h-3 w-40 max-w-full overflow-hidden rounded bg-gray-200">
-                        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                      </div>
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-3.5 w-28 animate-pulse rounded bg-gray-200" />
+                      <div className="h-3 w-40 max-w-full animate-pulse rounded bg-gray-100" />
                     </div>
                   </div>
                 </div>
@@ -442,18 +424,18 @@ export default function NavbarContent() {
                     <Link
                       href="/profile"
                       onClick={() => setMobileMenu(false)}
-                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 outline-none transition-all duration-200 hover:bg-gray-50 sm:min-h-[44px]"
+                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 transition-all hover:bg-gray-50 sm:min-h-[44px]"
                     >
-                      <User className="h-4 w-4 text-gray-600" />
+                      <User className="h-4 w-4" />
                       আমার প্রোফাইল
                     </Link>
 
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-500 outline-none transition-all duration-200 hover:bg-red-100 sm:min-h-[44px]"
+                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-500 transition-all hover:bg-red-100 sm:min-h-[44px]"
                     >
-                      <LogOut className="h-4 w-4 text-red-500" />
+                      <LogOut className="h-4 w-4" />
                       সাইন আউট
                     </button>
                   </div>
@@ -463,7 +445,7 @@ export default function NavbarContent() {
                   <Link
                     href="/sign-in"
                     onClick={() => setMobileMenu(false)}
-                    className="flex min-h-[42px] items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-800 outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50 hover:text-[#008a48] focus-visible:ring-2 focus-visible:ring-[#008a48]/15 sm:min-h-[44px]"
+                    className="flex min-h-[42px] items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-800 transition-all hover:border-green-200 hover:bg-green-50 hover:text-[#008a48] sm:min-h-[44px]"
                   >
                     সাইন ইন
                   </Link>
@@ -471,7 +453,7 @@ export default function NavbarContent() {
                   <Link
                     href="/sign-up"
                     onClick={() => setMobileMenu(false)}
-                    className="flex min-h-[42px] items-center justify-center rounded-lg bg-[#008a48] px-3 py-2 text-xs font-bold text-white shadow-sm outline-none transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#00783e] hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#008a48]/20 active:translate-y-0 sm:min-h-[44px]"
+                    className="flex min-h-[42px] items-center justify-center rounded-lg bg-[#008a48] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#00783e] sm:min-h-[44px]"
                   >
                     সাইন আপ
                   </Link>
@@ -481,6 +463,6 @@ export default function NavbarContent() {
           </div>
         </div>
       )}
-    </header>
+    </div>
   );
 }
