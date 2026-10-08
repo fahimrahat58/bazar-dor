@@ -132,6 +132,7 @@ export default function ProductDetailsPage({
     return (
       <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA] px-3 py-5 sm:px-5 sm:py-7 md:px-6 lg:px-8 lg:py-8">
         <div className="mx-auto w-full max-w-5xl animate-pulse">
+          {/* Breadcrumb Skeleton */}
           <div className="mb-4 flex items-center gap-2 sm:mb-5">
             <div className="h-3 w-10 rounded bg-gray-200 sm:h-4 sm:w-12" />
             <div className="h-3 w-2 rounded bg-gray-100 sm:h-4" />
@@ -140,6 +141,7 @@ export default function ProductDetailsPage({
             <div className="h-3 w-24 rounded bg-gray-200 sm:h-4 sm:w-32" />
           </div>
 
+          {/* Product Header Skeleton */}
           <section className="mb-5 rounded-2xl bg-[#F3F4F6]/90 p-4 sm:mb-6 sm:rounded-3xl sm:p-6 md:p-7 lg:p-8">
             <div className="flex flex-col gap-5 sm:gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 items-center gap-3 sm:gap-4">
@@ -162,8 +164,10 @@ export default function ProductDetailsPage({
             </div>
           </section>
 
+          {/* Summary Title Skeleton */}
           <div className="mb-3 h-5 w-32 rounded bg-gray-200 sm:mb-4 sm:h-6 sm:w-40" />
 
+          {/* Summary Cards Skeleton */}
           <section className="mb-7 sm:mb-8">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {[1, 2, 3].map((item) => (
@@ -181,8 +185,10 @@ export default function ProductDetailsPage({
             </div>
           </section>
 
+          {/* Market Title Skeleton */}
           <div className="mb-3 h-5 w-44 rounded bg-gray-200 sm:mb-4 sm:h-6 sm:w-52" />
 
+          {/* Market Table Skeleton */}
           <section className="mb-8 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm sm:mb-10 sm:rounded-2xl">
             <div className="overflow-x-auto">
               <div className="min-w-[600px]">
@@ -213,6 +219,7 @@ export default function ProductDetailsPage({
             </div>
           </section>
 
+          {/* Category Skeleton */}
           <div className="mb-6 sm:mb-8">
             <div className="h-5 w-32 rounded bg-gray-200 sm:h-6 sm:w-40" />
           </div>
@@ -266,8 +273,10 @@ export default function ProductDetailsPage({
 
   const totalAvg =
     product.markets.length > 0
-      ? product.markets.reduce((acc, m) => acc + (m.min + m.max) / 2, 0) /
-        product.markets.length
+      ? product.markets.reduce(
+          (acc, m) => acc + (m.min + m.max) / 2,
+          0,
+        ) / product.markets.length
       : 0;
 
   const isUp = product.change.dir === "up";
@@ -276,11 +285,13 @@ export default function ProductDetailsPage({
 
   const unitText = getUnitText(product.unit);
 
-  const productEmoji = product.image?.trim() || product.categoryIcon || "🛍️";
+  const productEmoji =
+    product.image?.trim() || product.categoryIcon || "🛍️";
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA] text-[#3C4043]">
       <div className="mx-auto w-full max-w-5xl px-3 py-5 sm:px-5 sm:py-7 md:px-6 lg:px-8 lg:py-8">
+        {/* Breadcrumb */}
         <nav className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 sm:mb-5 sm:text-sm">
           <Link
             href="/"
@@ -305,6 +316,7 @@ export default function ProductDetailsPage({
           </span>
         </nav>
 
+        {/* Product Header */}
         <section className="group mb-5 rounded-2xl bg-[#F3F4F6]/90 p-4 transition-all duration-200 hover:bg-[#F0F1F3] hover:shadow-sm sm:mb-6 sm:rounded-3xl sm:p-6 md:p-7 lg:p-8">
           <div className="flex flex-col gap-5 sm:gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
@@ -329,7 +341,9 @@ export default function ProductDetailsPage({
                     : isDown
                       ? "গতকালকের তুলনায় আজ দাম কমেছে"
                       : "গতকালকের তুলনায় আজ দাম অপরিবর্তিত রয়েছে"}{" "}
-                  {!isFlat && <>{toBengaliNumber(product.change.pct)}%</>}
+                  {!isFlat && (
+                    <>{toBengaliNumber(product.change.pct)}%</>
+                  )}
                 </p>
               </div>
             </div>
@@ -360,6 +374,7 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
+        {/* Summary */}
         <section className="mb-7 sm:mb-8">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:mb-4 sm:text-lg">
             দামের সারসংক্ষেপ
@@ -373,7 +388,9 @@ export default function ProductDetailsPage({
 
               <div className="mt-2 text-xl font-black text-[#0F9D58] transition-colors group-hover:text-[#008a48] sm:text-2xl">
                 {toBengaliNumber(minPrice)}{" "}
-                <span className="text-sm font-medium sm:text-base">টাকা</span>
+                <span className="text-sm font-medium sm:text-base">
+                  টাকা
+                </span>
               </div>
 
               <p className="mt-1 truncate text-xs text-gray-400">
@@ -388,7 +405,9 @@ export default function ProductDetailsPage({
 
               <div className="mt-2 text-xl font-black text-red-500 sm:text-2xl">
                 {toBengaliNumber(maxPrice)}{" "}
-                <span className="text-sm font-medium sm:text-base">টাকা</span>
+                <span className="text-sm font-medium sm:text-base">
+                  টাকা
+                </span>
               </div>
 
               <p className="mt-1 truncate text-xs text-gray-400">
@@ -403,7 +422,9 @@ export default function ProductDetailsPage({
 
               <div className="mt-2 text-xl font-black text-[#0F9D58] transition-colors group-hover:text-[#008a48] sm:text-2xl">
                 {toBengaliNumber(totalAvg.toFixed(2))}{" "}
-                <span className="text-sm font-medium sm:text-base">টাকা</span>
+                <span className="text-sm font-medium sm:text-base">
+                  টাকা
+                </span>
               </div>
 
               <p className="mt-1 text-xs text-gray-400">
@@ -413,6 +434,7 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
+        {/* Market Table */}
         <section className="mb-8 sm:mb-10">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:mb-4 sm:text-lg">
             বাজারভিত্তিক আজকের দাম
@@ -482,6 +504,7 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
+        {/* Category Link */}
         <div className="mb-6 sm:mb-8">
           <Link
             href={`/category/${product.category}`}
