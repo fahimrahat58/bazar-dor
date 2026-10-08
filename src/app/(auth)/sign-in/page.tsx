@@ -60,7 +60,7 @@ export default function SignInPage() {
     const toastId = toast.loading("সাইন ইন করা হচ্ছে...");
 
     try {
-      const { data, error } = await signIn.email({
+      const { error } = await signIn.email({
         email: formData.email.trim(),
         password: formData.password,
         rememberMe: true,
@@ -68,23 +68,33 @@ export default function SignInPage() {
 
       if (error) {
         toast.dismiss(toastId);
-        toast.error(error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
+
+        toast.error(
+          error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়",
+        );
+
         setLoading(false);
         return;
       }
 
-      if (data) {
-        toast.dismiss(toastId);
+      toast.dismiss(toastId);
 
-        sessionStorage.setItem("auth-success", "signin");
+      toast.success("সাইন ইন সফল হয়েছে!", {
+        duration: 2000,
+      });
 
-        router.replace(callbackUrl);
-      }
+      router.replace(callbackUrl);
     } catch (error) {
-      console.error(error);
+      console.error("SIGN IN ERROR:", error);
 
       toast.dismiss(toastId);
-      toast.error("সাইন ইন করতে সমস্যা হয়েছে");
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "সাইন ইন করতে সমস্যা হয়েছে",
+      );
+
       setLoading(false);
     }
   };
@@ -105,17 +115,25 @@ export default function SignInPage() {
 
       if (error) {
         toast.dismiss(toastId);
+
         toast.error(
           error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
         );
+
         setGoogleLoading(false);
         return;
       }
     } catch (error) {
-      console.error(error);
+      console.error("GOOGLE SIGN IN ERROR:", error);
 
       toast.dismiss(toastId);
-      toast.error("Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
+      );
+
       setGoogleLoading(false);
     }
   };
@@ -136,17 +154,25 @@ export default function SignInPage() {
 
       if (error) {
         toast.dismiss(toastId);
+
         toast.error(
           error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
         );
+
         setGithubLoading(false);
         return;
       }
     } catch (error) {
-      console.error(error);
+      console.error("GITHUB SIGN IN ERROR:", error);
 
       toast.dismiss(toastId);
-      toast.error("GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
+      );
+
       setGithubLoading(false);
     }
   };

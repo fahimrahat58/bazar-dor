@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, LogOut, Menu, ShoppingCart, User, X } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  Menu,
+  ShoppingCart,
+  User,
+  X,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -28,9 +35,12 @@ export default function NavbarContent() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  const previousUserRef = useRef<string | null>(null);
+
   const user = session?.user;
 
-  const getInitial = (name?: string) => name?.charAt(0).toUpperCase() || "U";
+  const getInitial = (name?: string) =>
+    name?.charAt(0).toUpperCase() || "U";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -83,6 +93,34 @@ export default function NavbarContent() {
   }, []);
 
   useEffect(() => {
+    if (isPending) return;
+
+    const currentUserId = user?.id || null;
+
+    if (currentUserId && previousUserRef.current === null) {
+      const authSuccess = sessionStorage.getItem("auth-success");
+
+      if (authSuccess === "signin") {
+        sessionStorage.removeItem("auth-success");
+
+        toast.success("সাইন ইন সফল হয়েছে!", {
+          duration: 3000,
+        });
+      }
+
+      if (authSuccess === "signup") {
+        sessionStorage.removeItem("auth-success");
+
+        toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!", {
+          duration: 3000,
+        });
+      }
+    }
+
+    previousUserRef.current = currentUserId;
+  }, [user, isPending]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         userDropdownRef.current &&
@@ -108,36 +146,48 @@ export default function NavbarContent() {
     const toastId = toast.loading("সাইন আউট করা হচ্ছে...");
 
     try {
-      await signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            toast.dismiss(toastId);
-            toast.success("সফলভাবে সাইন আউট হয়েছে!");
+      const result = await signOut();
 
-            setUserDropdownOpen(false);
-            setMobileMenu(false);
+      if (result.error) {
+        toast.dismiss(toastId);
 
-            window.location.href = "/";
-          },
-          onError: (context) => {
-            toast.dismiss(toastId);
-            toast.error(
-              context.error?.message || "সাইন আউট করতে সমস্যা হয়েছে",
-            );
-          },
-        },
+        toast.error(
+          result.error.message || "সাইন আউট করতে সমস্যা হয়েছে",
+        );
+
+        return;
+      }
+
+      toast.dismiss(toastId);
+
+      toast.success("সফলভাবে সাইন আউট হয়েছে!", {
+        duration: 2000,
       });
+
+      setUserDropdownOpen(false);
+      setMobileMenu(false);
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
     } catch (error) {
       console.error("Sign out error:", error);
+
       toast.dismiss(toastId);
-      toast.error("সাইন আউট করতে সমস্যা হয়েছে");
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "সাইন আউট করতে সমস্যা হয়েছে",
+      );
     }
   }
 
   const getCategoryUrl = (slug: string) =>
     `/category/${encodeURIComponent(slug)}`;
 
-  const isCategoryActive = (slug: string) => pathname === getCategoryUrl(slug);
+  const isCategoryActive = (slug: string) =>
+    pathname === getCategoryUrl(slug);
 
   const categoryClass = (isActive: boolean) =>
     `group flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-bold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#008a48]/15 xl:px-3 xl:text-[13px] ${
@@ -187,7 +237,9 @@ export default function NavbarContent() {
               <div className="relative" ref={userDropdownRef}>
                 <button
                   type="button"
-                  onClick={() => setUserDropdownOpen((previous) => !previous)}
+                  onClick={() =>
+                    setUserDropdownOpen((previous) => !previous)
+                  }
                   aria-expanded={userDropdownOpen}
                   className="flex items-center gap-2 rounded-full px-2 py-1 transition-all duration-200 hover:bg-gray-50"
                 >
@@ -233,6 +285,7 @@ export default function NavbarContent() {
                         <p className="truncate text-sm font-semibold text-gray-700">
                           {user.name || "User"}
                         </p>
+
                         <p className="truncate text-xs text-gray-400">
                           {user.email}
                         </p>
@@ -305,7 +358,13 @@ export default function NavbarContent() {
                   key={index}
                   className="h-7 shrink-0 animate-pulse rounded-md bg-gray-100"
                   style={{
-                    width: `${index % 3 === 0 ? 72 : index % 2 === 0 ? 64 : 80}px`,
+                    width: `${
+                      index % 3 === 0
+                        ? 72
+                        : index % 2 === 0
+                          ? 64
+                          : 80
+                    }px`,
                   }}
                 />
               ))
@@ -318,7 +377,9 @@ export default function NavbarContent() {
                 <Link
                   key={category.id}
                   href={getCategoryUrl(category.slug)}
-                  className={categoryClass(isCategoryActive(category.slug))}
+                  className={categoryClass(
+                    isCategoryActive(category.slug),
+                  )}
                 >
                   <span className="text-sm leading-none transition-transform duration-200 group-hover:scale-105 xl:text-[15px]">
                     {category.icon}
@@ -343,10 +404,17 @@ export default function NavbarContent() {
                     className="flex min-h-[42px] animate-pulse items-center gap-2 rounded-lg bg-gray-100 px-2.5 py-2 sm:min-h-[44px] sm:px-3"
                   >
                     <div className="h-5 w-5 shrink-0 rounded bg-gray-200" />
+
                     <div
                       className="h-3 rounded bg-gray-200"
                       style={{
-                        width: `${index % 3 === 0 ? 52 : index % 2 === 0 ? 44 : 60}px`,
+                        width: `${
+                          index % 3 === 0
+                            ? 52
+                            : index % 2 === 0
+                              ? 44
+                              : 60
+                        }px`,
                       }}
                     />
                   </div>
@@ -374,14 +442,15 @@ export default function NavbarContent() {
                         {category.icon}
                       </span>
 
-                      <span className="truncate">{category.nameBn}</span>
+                      <span className="truncate">
+                        {category.nameBn}
+                      </span>
                     </Link>
                   );
                 })
               )}
             </nav>
 
-            {/* Mobile User Section */}
             <div className="mt-3 border-t border-gray-100 pt-3 sm:mt-3.5 sm:pt-3.5">
               {isPending ? (
                 <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
