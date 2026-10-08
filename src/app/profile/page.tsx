@@ -99,7 +99,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => router.push("/update-profile")}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#008a48] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#00783e] active:scale-[0.98] sm:mb-1 sm:w-auto"
+                className="inline-flex w-full items-center cursor-pointer justify-center gap-2 rounded-xl bg-[#008a48] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#00783e] active:scale-[0.98] sm:mb-1 sm:w-auto"
               >
                 <Pencil size={16} />
                 প্রোফাইল আপডেট

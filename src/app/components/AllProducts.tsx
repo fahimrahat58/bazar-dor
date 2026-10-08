@@ -7,8 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 interface Market {
   market: string;
   division: string;
-  min: number;
-  max: number;
+  min: number | string;
+  max: number | string;
 }
 
 interface Product {
@@ -20,35 +20,69 @@ interface Product {
   categoryIcon: string;
   unit: string;
   image: string;
-  today: number;
-  yesterday: number;
-  lastWeek: number;
-  lastMonth: number;
+  today: number | string;
+  yesterday: number | string;
+  lastWeek: number | string;
+  lastMonth: number | string;
   change: {
     dir: "up" | "down" | "flat";
-    pct: number;
+    pct: number | string;
   };
-  markets: Market[];
+  markets?: Market[];
 }
 
 type SortOption = "default" | "price-low" | "price-high";
 
 const toBengaliNumber = (num: number | string): string => {
-  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  if (num === undefined || num === null) return "০";
+  const bnDigits: Record<string, string> = {
+    "0": "০",
+    "1": "১",
+    "2": "২",
+    "3": "৩",
+    "4": "৪",
+    "5": "৫",
+    "6": "৬",
+    "7": "৭",
+    "8": "৮",
+    "9": "৯",
+  };
 
-  return num
+  return num.toString().replace(/\d/g, (digit) => bnDigits[digit] || digit);
+};
+
+const parseBanglaToNumber = (val: number | string): number => {
+  if (typeof val === "number") return val;
+  if (!val) return 0;
+
+  const banglaToEnglishMap: Record<string, string> = {
+    "০": "0",
+    "১": "1",
+    "২": "2",
+    "৩": "3",
+    "৪": "4",
+    "৫": "5",
+    "৬": "6",
+    "৭": "7",
+    "৮": "8",
+    "৯": "9",
+  };
+
+  const englishDigits = val
     .toString()
-    .replace(/\d/g, (digit) => bnDigits[parseInt(digit, 10)]);
+    .replace(/[০-৯]/g, (match) => banglaToEnglishMap[match] || match)
+    .replace(/[^0-9.]/g, "");
+
+  return parseFloat(englishDigits) || 0;
 };
 
 const getUnitText = (unit: string): string => {
+  if (!unit) return "";
   switch (unit.toLowerCase()) {
     case "kg":
       return "কেজি";
 
     case "litre":
-      return "লিটার";
-
     case "liter":
       return "লিটার";
 
@@ -67,8 +101,7 @@ const getUnitText = (unit: string): string => {
 export default function AllProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedSort, setSelectedSort] =
-    useState<SortOption>("default");
+  const [selectedSort, setSelectedSort] = useState<SortOption>("default");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -96,10 +129,7 @@ export default function AllProducts() {
           setProducts([]);
         }
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.name !== "AbortError"
-        ) {
+        if (error instanceof Error && error.name !== "AbortError") {
           console.error("Error fetching products:", error);
           setProducts([]);
         }
@@ -120,10 +150,14 @@ export default function AllProducts() {
 
     switch (selectedSort) {
       case "price-low":
-        return list.sort((a, b) => a.today - b.today);
+        return list.sort(
+          (a, b) => parseBanglaToNumber(a.today) - parseBanglaToNumber(b.today),
+        );
 
       case "price-high":
-        return list.sort((a, b) => b.today - a.today);
+        return list.sort(
+          (a, b) => parseBanglaToNumber(b.today) - parseBanglaToNumber(a.today),
+        );
 
       default:
         return list;
@@ -139,13 +173,11 @@ export default function AllProducts() {
         <div className="mb-3.5 flex flex-col gap-2.5 sm:mb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3 md:mb-5">
           <div className="min-w-0">
             <div className="h-5 w-20 animate-pulse rounded-md bg-gray-200 sm:h-6 sm:w-24 md:h-7 md:w-28" />
-
             <div className="mt-2 h-3 w-36 animate-pulse rounded bg-gray-100 sm:w-44" />
           </div>
 
           <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
             <div className="h-3 w-8 animate-pulse rounded bg-gray-100" />
-
             <div className="h-9 w-full animate-pulse rounded-lg bg-gray-100 sm:h-8 sm:w-40" />
           </div>
         </div>
@@ -171,7 +203,6 @@ export default function AllProducts() {
                             : "55%",
                     }}
                   />
-
                   <div className="mt-2 h-2.5 w-20 animate-pulse rounded bg-gray-100 sm:h-3 sm:w-24" />
                 </div>
               </div>
@@ -179,7 +210,6 @@ export default function AllProducts() {
               <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 sm:mt-4 sm:pt-3">
                 <div className="min-w-0 flex-1">
                   <div className="h-2.5 w-16 animate-pulse rounded bg-gray-100 sm:h-3 sm:w-20" />
-
                   <div className="mt-2 h-5 w-24 animate-pulse rounded bg-gray-200 sm:h-6 sm:w-28 md:h-7 md:w-32" />
                 </div>
 
@@ -204,8 +234,7 @@ export default function AllProducts() {
           </h2>
 
           <p className="mt-0.5 text-[9px] font-medium text-gray-500 sm:text-[10px] md:text-xs">
-            মোট {toBengaliNumber(sortedProducts.length)}টি পণ্য
-            দেখানো হচ্ছে
+            মোট {toBengaliNumber(sortedProducts.length)}টি পণ্য দেখানো হচ্ছে
           </p>
         </div>
 
@@ -215,22 +244,12 @@ export default function AllProducts() {
           <div className="relative min-w-0 flex-1 sm:w-auto sm:flex-none">
             <select
               value={selectedSort}
-              onChange={(e) =>
-                setSelectedSort(
-                  e.target.value as SortOption,
-                )
-              }
+              onChange={(e) => setSelectedSort(e.target.value as SortOption)}
               className="w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-2.5 pr-8 text-[10px] font-semibold text-gray-800 shadow-sm outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50/40 focus:border-[#008a48] focus:ring-2 focus:ring-[#008a48]/10 sm:w-auto sm:py-1.5 sm:pl-3 sm:pr-8 sm:text-xs md:pl-3.5"
             >
               <option value="default">ডিফল্ট</option>
-
-              <option value="price-low">
-                দাম: কম থেকে বেশি
-              </option>
-
-              <option value="price-high">
-                দাম: বেশি থেকে কম
-              </option>
+              <option value="price-low">দাম: কম থেকে বেশি</option>
+              <option value="price-high">দাম: বেশি থেকে কম</option>
             </select>
 
             <ChevronDown
@@ -241,82 +260,87 @@ export default function AllProducts() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-        {sortedProducts.map((product) => {
-          const isUp = product.change?.dir === "up";
-          const isDown = product.change?.dir === "down";
+      {sortedProducts.length === 0 ? (
+        <div className="w-full rounded-xl border border-gray-100 bg-white p-8 text-center shadow-sm sm:rounded-2xl sm:p-12">
+          <div className="mb-2 text-3xl sm:text-4xl">📦</div>
+          <h3 className="text-sm font-bold text-gray-800 sm:text-base">
+            কোনো পণ্য পাওয়া যায় নি
+          </h3>
+          <p className="mt-1 text-xs text-gray-500">
+            বর্তমানে বাজারে কোনো পণ্যের তালিকা যুক্ত নেই।
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
+          {sortedProducts.map((product) => {
+            const priceNum = parseBanglaToNumber(product.today);
+            const pctNum = parseBanglaToNumber(product.change?.pct);
 
-          return (
-            <Link
-              key={product.id}
-              href={`/products/${product.slug}`}
-              className="group block min-w-0 rounded-xl outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[#008a48]/20 sm:rounded-2xl"
-            >
-              <div className="flex min-w-0 flex-col justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-green-200 group-hover:shadow-[0_8px_24px_rgba(0,138,72,0.10)] group-focus-visible:border-green-300 group-active:translate-y-0 group-active:scale-[0.99] sm:rounded-2xl sm:p-3.5 md:p-4">
-                <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f4f3] text-lg transition-all duration-300 group-hover:scale-105 group-hover:bg-green-50 sm:h-11 sm:w-11 sm:rounded-xl sm:text-xl md:h-12 md:w-12">
-                    {product.image ||
-                      product.categoryIcon ||
-                      "📦"}
-                  </div>
+            const isUp = product.change?.dir === "up";
+            const isDown = product.change?.dir === "down";
 
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-xs font-bold leading-tight text-gray-900 transition-colors duration-200 group-hover:text-[#008a48] sm:text-sm md:text-base">
-                      {product.nameBn}
-                    </h3>
+            return (
+              <Link
+                key={product.id}
+                href={`/products/${product.slug}`}
+                className="group block min-w-0 rounded-xl outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[#008a48]/20 sm:rounded-2xl"
+              >
+                <div className="flex min-w-0 flex-col justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-green-200 group-hover:shadow-[0_8px_24px_rgba(0,138,72,0.10)] group-focus-visible:border-green-300 group-active:translate-y-0 group-active:scale-[0.99] sm:rounded-2xl sm:p-3.5 md:p-4">
+                  <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f4f3] text-lg transition-all duration-300 group-hover:scale-105 group-hover:bg-green-50 sm:h-11 sm:w-11 sm:rounded-xl sm:text-xl md:h-12 md:w-12">
+                      {product.image || product.categoryIcon || "📦"}
+                    </div>
 
-                    <p className="mt-0.5 truncate text-[9px] font-medium text-gray-400 transition-colors duration-200 group-hover:text-gray-500 sm:text-[10px] md:text-[11px]">
-                      প্রতি {getUnitText(product.unit)}
-                    </p>
-                  </div>
-                </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-xs font-bold leading-tight text-gray-900 transition-colors duration-200 group-hover:text-[#008a48] sm:text-sm md:text-base">
+                        {product.nameBn}
+                      </h3>
 
-                <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 transition-colors duration-200 group-hover:border-green-50 sm:mt-4 sm:pt-3">
-                  <div className="min-w-0">
-                    <span className="block text-[8px] font-medium text-gray-400 sm:text-[9px] md:text-[10px]">
-                      আজকের দাম
-                    </span>
-
-                    <div className="mt-0.5 flex min-w-0 items-baseline gap-1">
-                      <span className="truncate text-base font-black text-gray-900 transition-colors duration-200 group-hover:text-[#008a48] sm:text-lg md:text-xl">
-                        {toBengaliNumber(product.today)}
-                      </span>
-
-                      <span className="shrink-0 text-[10px] font-semibold text-gray-800 sm:text-[11px] md:text-xs">
-                        টাকা
-                      </span>
+                      <p className="mt-0.5 truncate text-[9px] font-medium text-gray-400 transition-colors duration-200 group-hover:text-gray-500 sm:text-[10px] md:text-[11px]">
+                        প্রতি {getUnitText(product.unit)}
+                      </p>
                     </div>
                   </div>
 
-                  <div
-                    className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-bold transition-all duration-200 group-hover:scale-105 sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px] ${
-                      isUp
-                        ? "bg-[#fdf2f2] text-[#d9383a] group-hover:bg-[#fbe7e7]"
-                        : isDown
-                          ? "bg-[#eef7f2] text-[#008a48] group-hover:bg-[#e1f3e9]"
-                          : "bg-[#f3f4f6] text-gray-500 group-hover:bg-gray-100"
-                    }`}
-                  >
-                    {isUp &&
-                      `▲ ${toBengaliNumber(
-                        Math.abs(product.change?.pct || 0),
-                      )}%`}
+                  <div className="mt-3 flex min-w-0 items-end justify-between gap-2 border-t border-gray-50 pt-2.5 transition-colors duration-200 group-hover:border-green-50 sm:mt-4 sm:pt-3">
+                    <div className="min-w-0">
+                      <span className="block text-[8px] font-medium text-gray-400 sm:text-[9px] md:text-[10px]">
+                        আজকের দাম
+                      </span>
 
-                    {isDown &&
-                      `▼ ${toBengaliNumber(
-                        Math.abs(product.change?.pct || 0),
-                      )}%`}
+                      <div className="mt-0.5 flex min-w-0 items-baseline gap-1">
+                        <span className="truncate text-base font-black text-gray-900 transition-colors duration-200 group-hover:text-[#008a48] sm:text-lg md:text-xl">
+                          {toBengaliNumber(priceNum.toLocaleString("en-US"))}
+                        </span>
 
-                    {!isUp &&
-                      !isDown &&
-                      `— ${toBengaliNumber(0)}%`}
+                        <span className="shrink-0 text-[10px] font-semibold text-gray-800 sm:text-[11px] md:text-xs">
+                          টাকা
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-bold transition-all duration-200 group-hover:scale-105 sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px] ${
+                        isUp
+                          ? "bg-[#fdf2f2] text-[#d9383a] group-hover:bg-[#fbe7e7]"
+                          : isDown
+                            ? "bg-[#eef7f2] text-[#008a48] group-hover:bg-[#e1f3e9]"
+                            : "bg-[#f3f4f6] text-gray-500 group-hover:bg-gray-100"
+                      }`}
+                    >
+                      {isUp && `▲ ${toBengaliNumber(Math.abs(pctNum))}%`}
+
+                      {isDown && `▼ ${toBengaliNumber(Math.abs(pctNum))}%`}
+
+                      {!isUp && !isDown && `— ${toBengaliNumber(0)}%`}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

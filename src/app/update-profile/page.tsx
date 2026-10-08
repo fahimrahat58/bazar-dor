@@ -111,7 +111,7 @@ export default function UpdateProfilePage() {
         <button
           type="button"
           onClick={() => router.push("/profile")}
-          className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-gray-600 transition hover:text-[#008a48]"
+          className="mb-6 inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-gray-600 transition hover:text-[#008a48]"
         >
           <ArrowLeft size={18} />
           প্রোফাইলে ফিরে যান
