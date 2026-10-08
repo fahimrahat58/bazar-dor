@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "@/app/lib/auth-client";
 
 export default function SignInPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,6 +20,15 @@ export default function SignInPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const rawCallbackUrl = searchParams.get("callbackUrl");
+
+  const callbackUrl =
+    rawCallbackUrl &&
+    rawCallbackUrl.startsWith("/") &&
+    !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -65,7 +78,7 @@ export default function SignInPage() {
 
         sessionStorage.setItem("auth-success", "signin");
 
-        window.location.replace("/");
+        router.replace(callbackUrl);
       }
     } catch (error) {
       console.error(error);
@@ -86,14 +99,14 @@ export default function SignInPage() {
     try {
       const { error } = await signIn.social({
         provider: "google",
-        callbackURL: "/?auth=signin",
-        newUserCallbackURL: "/?auth=signup",
+        callbackURL: callbackUrl,
+        newUserCallbackURL: callbackUrl,
       });
 
       if (error) {
         toast.dismiss(toastId);
         toast.error(
-          error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে"
+          error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
         );
         setGoogleLoading(false);
         return;
@@ -117,14 +130,14 @@ export default function SignInPage() {
     try {
       const { error } = await signIn.social({
         provider: "github",
-        callbackURL: "/?auth=signin",
-        newUserCallbackURL: "/?auth=signup",
+        callbackURL: callbackUrl,
+        newUserCallbackURL: callbackUrl,
       });
 
       if (error) {
         toast.dismiss(toastId);
         toast.error(
-          error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে"
+          error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
         );
         setGithubLoading(false);
         return;
@@ -198,7 +211,9 @@ export default function SignInPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                   aria-label={
-                    showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
+                    showPassword
+                      ? "পাসওয়ার্ড লুকান"
+                      : "পাসওয়ার্ড দেখুন"
                   }
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
                 >
