@@ -228,7 +228,7 @@ export default function SignUpPage() {
           <div className="mt-4 text-center text-[11px] text-gray-600 sm:text-xs">
             অ্যাকাউন্ট আছে?{" "}
             <Link
-              href="/signin"
+              href="/sign-in"
               className="cursor-pointer font-semibold text-emerald-700 underline transition-colors hover:text-emerald-800"
             >
               সাইন ইন করুন
