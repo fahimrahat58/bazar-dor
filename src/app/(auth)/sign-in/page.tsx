@@ -72,30 +72,52 @@ export default function SignInPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (googleLoading || githubLoading || loading) return;
+
     setGoogleLoading(true);
 
+    const toastId = toast.loading("Google দিয়ে সাইন ইন করা হচ্ছে...");
+
     try {
-      await signIn.social({
+      const { error } = await signIn.social({
         provider: "google",
         callbackURL: "/",
       });
+
+      if (error) {
+        toast.dismiss(toastId);
+        toast.error(error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+        setGoogleLoading(false);
+      }
     } catch (error) {
       console.error(error);
+      toast.dismiss(toastId);
       toast.error("Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
       setGoogleLoading(false);
     }
   };
 
   const handleGitHubSignIn = async () => {
+    if (googleLoading || githubLoading || loading) return;
+
     setGithubLoading(true);
 
+    const toastId = toast.loading("GitHub দিয়ে সাইন ইন করা হচ্ছে...");
+
     try {
-      await signIn.social({
+      const { error } = await signIn.social({
         provider: "github",
         callbackURL: "/",
       });
+
+      if (error) {
+        toast.dismiss(toastId);
+        toast.error(error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+        setGithubLoading(false);
+      }
     } catch (error) {
       console.error(error);
+      toast.dismiss(toastId);
       toast.error("GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
       setGithubLoading(false);
     }
@@ -158,7 +180,7 @@ export default function SignInPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || googleLoading || githubLoading}
               className="mt-1.5 flex h-10 w-full cursor-pointer items-center justify-center rounded-xl bg-[#008a48] px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#00753d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-sm"
             >
               {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
@@ -179,7 +201,7 @@ export default function SignInPage() {
             <button
               onClick={handleGoogleSignIn}
               type="button"
-              disabled={googleLoading || githubLoading}
+              disabled={googleLoading || githubLoading || loading}
               className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
             >
               <svg
@@ -215,7 +237,7 @@ export default function SignInPage() {
             <button
               onClick={handleGitHubSignIn}
               type="button"
-              disabled={googleLoading || githubLoading}
+              disabled={googleLoading || githubLoading || loading}
               className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
             >
               <svg

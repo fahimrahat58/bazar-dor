@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { signOut, useSession } from "@/app/lib/auth-client";
 
 type Category = {
@@ -37,6 +38,11 @@ export default function NavbarContent() {
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const user = session?.user;
+
+  // নামের প্রথম অক্ষর বের করার ফাংশন
+  const getInitial = (name?: string) => {
+    return name ? name.charAt(0).toLowerCase() : "u";
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -108,16 +114,37 @@ export default function NavbarContent() {
   }, [pathname]);
 
   const handleSignOut = async () => {
+    const toastId = toast.loading("সাইন আউট করা হচ্ছে...");
+
     try {
       await signOut({
         fetchOptions: {
           onSuccess: () => {
-            window.location.href = "/";
+            toast.dismiss(toastId);
+            toast.success("সফলভাবে সাইন আউট হয়েছে!");
+
+            setUserDropdownOpen(false);
+            setMobileMenu(false);
+
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 500);
+          },
+
+          onError: (context) => {
+            toast.dismiss(toastId);
+
+            toast.error(
+              context.error?.message || "সাইন আউট করতে সমস্যা হয়েছে"
+            );
           },
         },
       });
     } catch (error) {
       console.error("Sign out error:", error);
+
+      toast.dismiss(toastId);
+      toast.error("সাইন আউট করতে সমস্যা হয়েছে");
     }
   };
 
@@ -165,100 +192,66 @@ export default function NavbarContent() {
           <div className="hidden items-center gap-1 lg:flex lg:gap-1.5">
             {isPending ? (
               <div className="flex items-center gap-2 px-2 py-1.5">
-                <div className="relative h-9 w-9 overflow-hidden rounded-full bg-gray-100">
+                <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gray-100">
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
                 </div>
-
-                <div className="hidden space-y-1.5 xl:block">
-                  <div className="relative h-3 w-20 overflow-hidden rounded bg-gray-100">
-                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                  </div>
-
-                  <div className="relative h-2.5 w-28 overflow-hidden rounded bg-gray-100">
-                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                  </div>
+                <div className="relative h-4 w-20 overflow-hidden rounded bg-gray-100">
+                  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
                 </div>
               </div>
             ) : user ? (
               <div className="relative" ref={userDropdownRef}>
+                {/* User Trigger Button */}
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-200 hover:bg-gray-50"
+                  className="flex items-center gap-2 rounded-full px-2 py-1 transition-all duration-200 hover:bg-gray-50"
                 >
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={user.name || "User"}
-                      className="h-9 w-9 rounded-full object-cover ring-2 ring-green-50"
-                    />
-                  ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50 text-[#008a48]">
-                      <User className="h-5 w-5" />
-                    </div>
-                  )}
-
-                  <div className="hidden max-w-32 text-left xl:block">
-                    <p className="truncate text-sm font-bold text-gray-800">
-                      {user.name || "User"}
-                    </p>
-
-                    <p className="truncate text-[10px] text-gray-500">
-                      {user.email}
-                    </p>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
+                    {getInitial(user.name)}
                   </div>
 
+                  <span className="text-sm font-semibold text-gray-800">
+                    {user.name || "User"}
+                  </span>
+
                   <ChevronDown
-                    className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+                    className={`h-3.5 w-3.5 text-gray-500 transition-transform duration-200 ${
                       userDropdownOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
+                {/* Dropdown Card */}
                 {userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-[250px] max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
-                    <div className="border-b border-gray-100 px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {user.image ? (
-                          <img
-                            src={user.image}
-                            alt={user.name || "User"}
-                            className="h-10 w-10 shrink-0 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#008a48]">
-                            <User className="h-5 w-5" />
-                          </div>
-                        )}
-
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-gray-800">
-                            {user.name || "User"}
-                          </p>
-
-                          <p className="truncate text-xs text-gray-500">
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
+                  <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-gray-100/80 bg-white p-4 shadow-xl shadow-black/5">
+                    {/* User Info Header */}
+                    <div className="mb-3 px-1">
+                      <p className="text-sm font-semibold text-gray-700">
+                        {user.name || "User"}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {user.email}
+                      </p>
                     </div>
 
-                    <div className="p-2">
+                    {/* Menu Items */}
+                    <div className="space-y-1">
                       <Link
                         href="/profile"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-green-50 hover:text-[#008a48]"
+                        className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                       >
-                        <User className="h-4 w-4" />
-                        প্রোফাইল
+                        <User className="h-4 w-4 text-gray-600" />
+                        আমার প্রোফাইল
                       </Link>
 
                       <button
                         type="button"
                         onClick={handleSignOut}
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition-all duration-200 hover:bg-red-50"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50/50"
                       >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-4 w-4 text-red-500" />
                         সাইন আউট
                       </button>
                     </div>
@@ -314,7 +307,7 @@ export default function NavbarContent() {
               ))
             ) : categories.length === 0 ? (
               <span className="text-xs font-medium text-gray-400">
-                কোনো ক্যাটাগরি পাওয়া যায়নি
+                কোনো ক্যাটাগরি পাওয়া যায়নি
               </span>
             ) : (
               categories.map((category) => {
@@ -359,7 +352,7 @@ export default function NavbarContent() {
                 ))
               ) : categories.length === 0 ? (
                 <span className="col-span-full py-2 text-center text-xs font-medium text-gray-400">
-                  কোনো ক্যাটাগরি পাওয়া যায়নি
+                  কোনো ক্যাটাগরি পাওয়া যায়নি
                 </span>
               ) : (
                 categories.map((category) => {
@@ -411,24 +404,16 @@ export default function NavbarContent() {
               ) : user ? (
                 <div>
                   <div className="mb-3 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-                    {user.image ? (
-                      <img
-                        src={user.image}
-                        alt={user.name || "User"}
-                        className="h-10 w-10 shrink-0 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#008a48]">
-                        <User className="h-5 w-5" />
-                      </div>
-                    )}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
+                      {getInitial(user.name)}
+                    </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-gray-800">
+                      <p className="truncate text-sm font-semibold text-gray-800">
                         {user.name || "User"}
                       </p>
 
-                      <p className="truncate text-xs text-gray-500">
+                      <p className="truncate text-xs text-gray-400">
                         {user.email}
                       </p>
                     </div>
@@ -438,18 +423,18 @@ export default function NavbarContent() {
                     <Link
                       href="/profile"
                       onClick={() => setMobileMenu(false)}
-                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-800 outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50 hover:text-[#008a48] focus-visible:ring-2 focus-visible:ring-[#008a48]/15 sm:min-h-[44px]"
+                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 outline-none transition-all duration-200 hover:bg-gray-50 sm:min-h-[44px]"
                     >
-                      <User className="h-4 w-4" />
-                      প্রোফাইল
+                      <User className="h-4 w-4 text-gray-600" />
+                      আমার প্রোফাইল
                     </Link>
 
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-600 outline-none transition-all duration-200 hover:bg-red-100 focus-visible:ring-2 focus-visible:ring-red-500/15 sm:min-h-[44px]"
+                      className="flex min-h-[42px] items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-500 outline-none transition-all duration-200 hover:bg-red-100 sm:min-h-[44px]"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-4 w-4 text-red-500" />
                       সাইন আউট
                     </button>
                   </div>
