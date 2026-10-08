@@ -79,9 +79,7 @@ export default function SignInPage() {
 
       toast.dismiss(toastId);
 
-      toast.success("সাইন ইন সফল হয়েছে!", {
-        duration: 2000,
-      });
+      sessionStorage.setItem("auth-success", "signin");
 
       router.replace(callbackUrl);
     } catch (error) {
