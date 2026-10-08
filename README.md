@@ -6,7 +6,7 @@
 
 ## 🌐 Live Demo
 
-🔗 **Live Website:** https://bazar-dor.vercel.app/
+🔗 **Live Website:** https://bazar-dor-fahims.vercel.app/
 
 🔗 **GitHub Repository:** https://github.com/fahimrahat58/bazar-dor
 
@@ -66,7 +66,7 @@
 - Email/password authentication.
 - Social authentication support.
 - Protected routes for authenticated users.
-- Authentication success/error notifications.
+- Authentication success and error notifications.
 
 ### 👤 User Profile
 
@@ -98,7 +98,7 @@
 ### 🚫 Custom 404 Handling
 
 - Friendly custom 404 pages for invalid routes.
-- Invalid product/category URLs show a clear error state.
+- Invalid product and category URLs show a clear error state.
 - Easy navigation back to the home page.
 
 ---
