@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 interface Market {
@@ -48,6 +49,9 @@ const getUnitText = (unit: string): string => {
     case "litre":
       return "লিটার";
 
+    case "liter":
+      return "লিটার";
+
     case "doz":
     case "dozen":
       return "ডজন";
@@ -63,7 +67,8 @@ const getUnitText = (unit: string): string => {
 export default function AllProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedSort, setSelectedSort] = useState<SortOption>("default");
+  const [selectedSort, setSelectedSort] =
+    useState<SortOption>("default");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -91,7 +96,10 @@ export default function AllProducts() {
           setProducts([]);
         }
       } catch (error) {
-        if (error instanceof Error && error.name !== "AbortError") {
+        if (
+          error instanceof Error &&
+          error.name !== "AbortError"
+        ) {
           console.error("Error fetching products:", error);
           setProducts([]);
         }
@@ -196,22 +204,40 @@ export default function AllProducts() {
           </h2>
 
           <p className="mt-0.5 text-[9px] font-medium text-gray-500 sm:text-[10px] md:text-xs">
-            মোট {toBengaliNumber(sortedProducts.length)}টি পণ্য দেখানো হচ্ছে
+            মোট {toBengaliNumber(sortedProducts.length)}টি পণ্য
+            দেখানো হচ্ছে
           </p>
         </div>
 
         <div className="flex w-full items-center justify-between gap-2 text-[10px] font-medium text-gray-500 sm:w-auto sm:justify-end sm:gap-2.5 sm:text-xs">
           <span className="shrink-0">সাজান</span>
 
-          <select
-            value={selectedSort}
-            onChange={(e) => setSelectedSort(e.target.value as SortOption)}
-            className="min-w-0 flex-1 cursor-pointer rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-[10px] font-semibold text-gray-800 shadow-sm outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50/40 focus:border-[#008a48] focus:ring-2 focus:ring-[#008a48]/10 sm:w-auto sm:flex-none sm:px-3 sm:py-1.5 sm:text-xs md:px-3.5"
-          >
-            <option value="default">ডিফল্ট</option>
-            <option value="price-low">দাম: কম থেকে বেশি</option>
-            <option value="price-high">দাম: বেশি থেকে কম</option>
-          </select>
+          <div className="relative min-w-0 flex-1 sm:w-auto sm:flex-none">
+            <select
+              value={selectedSort}
+              onChange={(e) =>
+                setSelectedSort(
+                  e.target.value as SortOption,
+                )
+              }
+              className="w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-2.5 pr-8 text-[10px] font-semibold text-gray-800 shadow-sm outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50/40 focus:border-[#008a48] focus:ring-2 focus:ring-[#008a48]/10 sm:w-auto sm:py-1.5 sm:pl-3 sm:pr-8 sm:text-xs md:pl-3.5"
+            >
+              <option value="default">ডিফল্ট</option>
+
+              <option value="price-low">
+                দাম: কম থেকে বেশি
+              </option>
+
+              <option value="price-high">
+                দাম: বেশি থেকে কম
+              </option>
+            </select>
+
+            <ChevronDown
+              className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500 sm:right-2.5 sm:h-4 sm:w-4"
+              strokeWidth={2}
+            />
+          </div>
         </div>
       </div>
 
@@ -228,8 +254,10 @@ export default function AllProducts() {
             >
               <div className="flex min-w-0 flex-col justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-green-200 group-hover:shadow-[0_8px_24px_rgba(0,138,72,0.10)] group-focus-visible:border-green-300 group-active:translate-y-0 group-active:scale-[0.99] sm:rounded-2xl sm:p-3.5 md:p-4">
                 <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f4f3] text-lg transition-all duration-300 group-hover:bg-green-50 group-hover:scale-105 sm:h-11 sm:w-11 sm:rounded-xl sm:text-xl md:h-12 md:w-12">
-                    {product.image || product.categoryIcon || "📦"}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f4f3] text-lg transition-all duration-300 group-hover:scale-105 group-hover:bg-green-50 sm:h-11 sm:w-11 sm:rounded-xl sm:text-xl md:h-12 md:w-12">
+                    {product.image ||
+                      product.categoryIcon ||
+                      "📦"}
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -279,7 +307,9 @@ export default function AllProducts() {
                         Math.abs(product.change?.pct || 0),
                       )}%`}
 
-                    {!isUp && !isDown && `— ${toBengaliNumber(0)}%`}
+                    {!isUp &&
+                      !isDown &&
+                      `— ${toBengaliNumber(0)}%`}
                   </div>
                 </div>
               </div>

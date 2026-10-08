@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Product = {
@@ -38,6 +39,25 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>("default");
 
+  const toBengaliNum = (num: number | string) => {
+    const bengaliDigits = [
+      "০",
+      "১",
+      "২",
+      "৩",
+      "৪",
+      "৫",
+      "৬",
+      "৭",
+      "৮",
+      "৯",
+    ];
+
+    return num
+      .toString()
+      .replace(/\d/g, (digit) => bengaliDigits[Number(digit)]);
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -55,14 +75,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       mounted = false;
     };
   }, [params]);
-
-  const toBengaliNum = (num: number | string) => {
-    const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-
-    return num
-      .toString()
-      .replace(/\d/g, (digit) => bengaliDigits[Number(digit)]);
-  };
 
   useEffect(() => {
     if (!slug) return;
@@ -89,26 +101,46 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         const data: Product[] = await response.json();
 
         if (!Array.isArray(data)) {
-          setProducts([]);
+          if (!controller.signal.aborted) {
+            setProducts([]);
+            setCategoryName("");
+            setCategoryIcon("");
+          }
+
           return;
         }
 
-        setProducts(data);
+        if (!controller.signal.aborted) {
+          setProducts(data);
 
-        if (data.length > 0) {
-          setCategoryName(data[0].categoryNameBn || "");
-          setCategoryIcon(data[0].categoryIcon || "");
-        } else {
-          setCategoryName("");
-          setCategoryIcon("");
+          if (data.length > 0) {
+            setCategoryName(data[0].categoryNameBn || "");
+            setCategoryIcon(data[0].categoryIcon || "");
+          } else {
+            setCategoryName("");
+            setCategoryIcon("");
+          }
         }
-      } catch (error: any) {
-        if (error.name !== "AbortError") {
-          console.error("Error fetching category products:", error);
-          setProducts([]);
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.name !== "AbortError"
+        ) {
+          console.error(
+            "Error fetching category products:",
+            error,
+          );
+
+          if (!controller.signal.aborted) {
+            setProducts([]);
+            setCategoryName("");
+            setCategoryIcon("");
+          }
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -145,12 +177,14 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               </h1>
 
               <p className="mt-0.5 truncate text-[10px] font-medium leading-relaxed text-gray-500 sm:text-xs md:text-sm">
-                {toBengaliNum(products.length)}টি পণ্যের আজকের দাম ও পরিবর্তন
+                {toBengaliNum(products.length)}
+                টি পণ্যের আজকের দাম ও পরিবর্তন
               </p>
             </div>
           </div>
         </div>
 
+        {/* Count + Sort */}
         <div className="mb-4 flex min-w-0 flex-col gap-2.5 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <span className="shrink-0 text-[11px] font-bold text-gray-600 sm:text-xs md:text-sm">
             মোট {toBengaliNum(products.length)}টি পণ্য দেখানো হচ্ছে
@@ -161,18 +195,34 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               সাজান
             </span>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="min-w-0 max-w-full flex-1 cursor-pointer rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-bold text-gray-700 shadow-sm outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50/40 focus:border-[#008a48] focus:ring-2 focus:ring-[#008a48]/10 sm:w-auto sm:flex-none sm:px-3 sm:py-1.5 sm:text-xs md:px-3.5"
-            >
-              <option value="default">ডিফল্ট</option>
-              <option value="price-low">দাম: কম থেকে বেশি</option>
-              <option value="price-high">দাম: বেশি থেকে কম</option>
-            </select>
+            <div className="relative min-w-0 flex-1 sm:w-auto sm:flex-none">
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(e.target.value as SortOption)
+                }
+                className="w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-2.5 py-2 pr-8 text-[11px] font-bold text-gray-700 shadow-sm outline-none transition-all duration-200 hover:border-green-200 hover:bg-green-50/40 focus:border-[#008a48] focus:ring-2 focus:ring-[#008a48]/10 sm:w-auto sm:px-3 sm:py-1.5 sm:pr-8 sm:text-xs md:px-3.5"
+              >
+                <option value="default">ডিফল্ট</option>
+
+                <option value="price-low">
+                  দাম: কম থেকে বেশি
+                </option>
+
+                <option value="price-high">
+                  দাম: বেশি থেকে কম
+                </option>
+              </select>
+
+              <ChevronDown
+                className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500 sm:right-2.5 sm:h-4 sm:w-4"
+                strokeWidth={2}
+              />
+            </div>
           </div>
         </div>
 
+        {/* Loading */}
         {loading ? (
           <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -181,7 +231,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 className="min-w-0 w-full rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm sm:rounded-2xl sm:p-4 md:p-4.5"
               >
                 <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
-                  {/* Icon */}
                   <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-gray-200 sm:h-10 sm:w-10 sm:rounded-xl" />
 
                   <div className="min-w-0 flex-1">
@@ -208,18 +257,23 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             ))}
           </div>
         ) : sortedProducts.length === 0 ? (
+          /* Empty State */
           <div className="w-full min-w-0 rounded-xl border border-gray-100 bg-white p-8 text-center shadow-sm transition-shadow duration-300 hover:shadow-md sm:rounded-2xl sm:p-10 md:p-12">
-            <div className="mb-2 text-3xl sm:text-4xl">📦</div>
+            <div className="mb-2 text-3xl sm:text-4xl">
+              📦
+            </div>
 
             <p className="text-xs font-bold text-gray-500 sm:text-sm">
               কোনো পণ্য পাওয়া যায়নি।
             </p>
           </div>
         ) : (
+          /* Product Grid */
           <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
             {sortedProducts.map((product) => {
               const price = Number(product.today) || 0;
-              const change = Number(product.change?.pct) || 0;
+              const change =
+                Number(product.change?.pct) || 0;
 
               return (
                 <Link
@@ -229,7 +283,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 >
                   <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-50 text-lg transition-all duration-300 group-hover:scale-105 group-hover:bg-green-100 sm:h-10 sm:w-10 sm:rounded-xl sm:text-xl">
-                      {product.image || product.categoryIcon || "📦"}
+                      {product.image ||
+                        product.categoryIcon ||
+                        "📦"}
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -242,11 +298,15 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                           ? "প্রতি কেজি"
                           : product.unit === "litre"
                             ? "প্রতি লিটার"
-                            : product.unit === "dozen"
-                              ? "প্রতি ডজন"
-                              : product.unit === "piece"
-                                ? "প্রতি পিস"
-                                : product.unit}
+                            : product.unit === "liter"
+                              ? "প্রতি লিটার"
+                              : product.unit === "dozen"
+                                ? "প্রতি ডজন"
+                                : product.unit === "doz"
+                                  ? "প্রতি ডজন"
+                                  : product.unit === "piece"
+                                    ? "প্রতি পিস"
+                                    : product.unit}
                       </p>
                     </div>
                   </div>
@@ -258,7 +318,10 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                       </span>
 
                       <span className="whitespace-nowrap text-sm font-black text-gray-900 transition-colors duration-200 group-hover:text-green-700 sm:text-base md:text-lg">
-                        {toBengaliNum(price.toLocaleString("en-US"))} টাকা
+                        {toBengaliNum(
+                          price.toLocaleString("en-US"),
+                        )}{" "}
+                        টাকা
                       </span>
                     </div>
 
@@ -279,7 +342,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                             : "—"}
                       </span>
 
-                      <span>{toBengaliNum(Math.abs(change))}%</span>
+                      <span>
+                        {toBengaliNum(Math.abs(change))}%
+                      </span>
                     </div>
                   </div>
 
