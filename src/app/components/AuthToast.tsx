@@ -20,6 +20,16 @@ export default function AuthToast() {
       return;
     }
 
+    if (message === "login-success") {
+      toast.success("সফলভাবে সাইন ইন হয়েছে!", {
+        duration: 3000,
+      });
+
+      window.history.replaceState({}, "", window.location.pathname);
+
+      return;
+    }
+
     if (authType === "signup") {
       toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!", {
         duration: 3000,
@@ -36,6 +46,8 @@ export default function AuthToast() {
       });
 
       window.history.replaceState({}, "", window.location.pathname);
+
+      return;
     }
   }, []);
 

@@ -77,7 +77,7 @@ export default function SignInPage() {
       toast.dismiss(loadingToastId);
 
       const redirectUrl = new URL(callbackUrl, window.location.origin);
-      redirectUrl.searchParams.set("auth", "signin");
+      redirectUrl.searchParams.set("message", "login-success");
 
       window.location.href = redirectUrl.toString();
     } catch (error) {
