@@ -7,7 +7,15 @@ export async function proxy(request: NextRequest) {
   });
 
   if (!session) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    const signInUrl = new URL("/sign-in", request.url);
+
+    const callbackUrl =
+      request.nextUrl.pathname + request.nextUrl.search;
+
+    signInUrl.searchParams.set("callbackUrl", callbackUrl);
+    signInUrl.searchParams.set("message", "login-required");
+
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
