@@ -9,8 +9,7 @@ export async function proxy(request: NextRequest) {
   if (!session) {
     const signInUrl = new URL("/sign-in", request.url);
 
-    const callbackUrl =
-      request.nextUrl.pathname + request.nextUrl.search;
+    const callbackUrl = request.nextUrl.pathname + request.nextUrl.search;
 
     signInUrl.searchParams.set("callbackUrl", callbackUrl);
     signInUrl.searchParams.set("message", "login-required");
@@ -22,5 +21,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/products/:path*", "/profile/:path*"],
+  matcher: ["/products/:path*", "/profile/:path*", "/update-profile/:path*"],
 };

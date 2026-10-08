@@ -34,7 +34,8 @@ interface Product {
 type SortOption = "default" | "price-low" | "price-high";
 
 const toBengaliNumber = (num: number | string): string => {
-  if (num === undefined || num === null) return "০";
+  if (num === undefined || num === null || num === "") return "০";
+
   const bnDigits: Record<string, string> = {
     "0": "০",
     "1": "১",
@@ -52,7 +53,7 @@ const toBengaliNumber = (num: number | string): string => {
 };
 
 const parseBanglaToNumber = (val: number | string): number => {
-  if (typeof val === "number") return val;
+  if (typeof val === "number") return isNaN(val) ? 0 : val;
   if (!val) return 0;
 
   const banglaToEnglishMap: Record<string, string> = {
@@ -73,7 +74,8 @@ const parseBanglaToNumber = (val: number | string): number => {
     .replace(/[০-৯]/g, (match) => banglaToEnglishMap[match] || match)
     .replace(/[^0-9.]/g, "");
 
-  return parseFloat(englishDigits) || 0;
+  const parsed = parseFloat(englishDigits);
+  return isNaN(parsed) ? 0 : parsed;
 };
 
 const getUnitText = (unit: string): string => {
@@ -274,10 +276,16 @@ export default function AllProducts() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
           {sortedProducts.map((product) => {
             const priceNum = parseBanglaToNumber(product.today);
-            const pctNum = parseBanglaToNumber(product.change?.pct);
+            const rawPct = product.change?.pct;
+            const pctNum = parseBanglaToNumber(rawPct);
 
             const isUp = product.change?.dir === "up";
             const isDown = product.change?.dir === "down";
+
+            const absPct = Math.abs(pctNum);
+            const pctFormatted = Number.isInteger(absPct)
+              ? absPct.toString()
+              : absPct.toFixed(1);
 
             return (
               <Link
@@ -320,7 +328,7 @@ export default function AllProducts() {
                     </div>
 
                     <div
-                      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-bold transition-all duration-200 group-hover:scale-105 sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px] ${
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold transition-all duration-200 group-hover:scale-105 sm:px-2.5 sm:py-1 sm:text-[10px] md:text-[11px] ${
                         isUp
                           ? "bg-[#fdf2f2] text-[#d9383a] group-hover:bg-[#fbe7e7]"
                           : isDown
@@ -328,10 +336,8 @@ export default function AllProducts() {
                             : "bg-[#f3f4f6] text-gray-500 group-hover:bg-gray-100"
                       }`}
                     >
-                      {isUp && `▲ ${toBengaliNumber(Math.abs(pctNum))}%`}
-
-                      {isDown && `▼ ${toBengaliNumber(Math.abs(pctNum))}%`}
-
+                      {isUp && `▲ ${toBengaliNumber(pctFormatted)}%`}
+                      {isDown && `▼ ${toBengaliNumber(pctFormatted)}%`}
                       {!isUp && !isDown && `— ${toBengaliNumber(0)}%`}
                     </div>
                   </div>
