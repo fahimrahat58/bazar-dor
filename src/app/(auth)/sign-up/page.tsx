@@ -68,6 +68,7 @@ export default function SignUpPage() {
         toast.error(
           error.message || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে"
         );
+        setLoading(false);
         return;
       }
 
@@ -79,7 +80,6 @@ export default function SignUpPage() {
 
       toast.dismiss(toastId);
       toast.error("অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে");
-    } finally {
       setLoading(false);
     }
   };
@@ -89,8 +89,6 @@ export default function SignUpPage() {
 
     setGoogleLoading(true);
 
-    const toastId = toast.loading("Google দিয়ে সাইন আপ করা হচ্ছে...");
-
     try {
       const { error } = await signIn.social({
         provider: "google",
@@ -98,20 +96,16 @@ export default function SignUpPage() {
       });
 
       if (error) {
-        toast.dismiss(toastId);
-
         toast.error(
           error.message || "Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
         );
-
         setGoogleLoading(false);
+        return;
       }
     } catch (error) {
       console.error("Google signup error:", error);
 
-      toast.dismiss(toastId);
       toast.error("Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
-
       setGoogleLoading(false);
     }
   };
@@ -121,8 +115,6 @@ export default function SignUpPage() {
 
     setGithubLoading(true);
 
-    const toastId = toast.loading("GitHub দিয়ে সাইন আপ করা হচ্ছে...");
-
     try {
       const { error } = await signIn.social({
         provider: "github",
@@ -130,20 +122,16 @@ export default function SignUpPage() {
       });
 
       if (error) {
-        toast.dismiss(toastId);
-
         toast.error(
           error.message || "GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
         );
-
         setGithubLoading(false);
+        return;
       }
     } catch (error) {
       console.error("GitHub signup error:", error);
 
-      toast.dismiss(toastId);
       toast.error("GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
-
       setGithubLoading(false);
     }
   };
@@ -226,7 +214,8 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700"
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
                   aria-label={
                     showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
                   }
@@ -265,7 +254,8 @@ export default function SignUpPage() {
                   onClick={() =>
                     setShowConfirmPassword(!showConfirmPassword)
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700"
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
                   aria-label={
                     showConfirmPassword
                       ? "পাসওয়ার্ড লুকান"

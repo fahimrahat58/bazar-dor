@@ -11,14 +11,14 @@ export default function AuthToast() {
 
     sessionStorage.removeItem("auth-success");
 
-    if (authSuccess === "signup") {
-      toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!", {
+    if (authSuccess === "signin") {
+      toast.success("সাইন ইন সফল হয়েছে!", {
         duration: 3000,
       });
     }
 
-    if (authSuccess === "signin") {
-      toast.success("সফলভাবে সাইন ইন হয়েছে!", {
+    if (authSuccess === "signup") {
+      toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!", {
         duration: 3000,
       });
     }

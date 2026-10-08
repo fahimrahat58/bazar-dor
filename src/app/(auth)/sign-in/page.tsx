@@ -56,31 +56,22 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
         toast.error(error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
+        setLoading(false);
         return;
       }
 
       if (data) {
         toast.dismiss(toastId);
 
-        toast.success("সাইন ইন সফল হয়েছে!", {
-          duration: 1500,
-        });
+        sessionStorage.setItem("auth-success", "signin");
 
-        setFormData({
-          email: "",
-          password: "",
-        });
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1500);
+        window.location.replace("/");
       }
     } catch (error) {
       console.error(error);
 
       toast.dismiss(toastId);
       toast.error("সাইন ইন করতে সমস্যা হয়েছে");
-    } finally {
       setLoading(false);
     }
   };
