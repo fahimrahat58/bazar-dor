@@ -39,9 +39,8 @@ export default function NavbarContent() {
 
   const user = session?.user;
 
-  // নামের প্রথম অক্ষর বের করার ফাংশন
   const getInitial = (name?: string) => {
-    return name ? name.charAt(0).toLowerCase() : "u";
+    return name ? name.charAt(0).toUpperCase() : "U";
   };
 
   useEffect(() => {
@@ -158,10 +157,8 @@ export default function NavbarContent() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
-      {/* Main Navbar */}
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-5 md:px-7 lg:px-10 xl:px-14">
         <div className="flex min-h-[56px] items-center justify-between gap-3 sm:min-h-[60px] md:min-h-[64px]">
-          {/* Logo */}
           <Link
             href="/"
             onClick={() => setMobileMenu(false)}
@@ -188,28 +185,35 @@ export default function NavbarContent() {
             </div>
           </Link>
 
-          {/* Desktop Auth */}
           <div className="hidden items-center gap-1 lg:flex lg:gap-1.5">
             {isPending ? (
               <div className="flex items-center gap-2 px-2 py-1.5">
                 <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gray-100">
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
                 </div>
+
                 <div className="relative h-4 w-20 overflow-hidden rounded bg-gray-100">
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
                 </div>
               </div>
             ) : user ? (
               <div className="relative" ref={userDropdownRef}>
-                {/* User Trigger Button */}
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 rounded-full px-2 py-1 transition-all duration-200 hover:bg-gray-50"
                 >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
-                    {getInitial(user.name)}
-                  </div>
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name || "User"}
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
+                      {getInitial(user.name)}
+                    </div>
+                  )}
 
                   <span className="text-sm font-semibold text-gray-800">
                     {user.name || "User"}
@@ -222,20 +226,32 @@ export default function NavbarContent() {
                   />
                 </button>
 
-                {/* Dropdown Card */}
                 {userDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-gray-100/80 bg-white p-4 shadow-xl shadow-black/5">
-                    {/* User Info Header */}
-                    <div className="mb-3 px-1">
-                      <p className="text-sm font-semibold text-gray-700">
-                        {user.name || "User"}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {user.email}
-                      </p>
+                    <div className="mb-3 flex items-center gap-3 px-1">
+                      {user.image ? (
+                        <img
+                          src={user.image}
+                          alt={user.name || "User"}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
+                          {getInitial(user.name)}
+                        </div>
+                      )}
+
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-gray-700">
+                          {user.name || "User"}
+                        </p>
+
+                        <p className="truncate text-xs text-gray-400">
+                          {user.email}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Menu Items */}
                     <div className="space-y-1">
                       <Link
                         href="/profile"
@@ -277,7 +293,6 @@ export default function NavbarContent() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={() => setMobileMenu((prev) => !prev)}
@@ -294,7 +309,6 @@ export default function NavbarContent() {
         </div>
       </div>
 
-      {/* Desktop Categories */}
       <div className="hidden border-t border-gray-100 bg-white lg:block">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-5 md:px-7 lg:px-10 xl:px-14">
           <nav className="scrollbar-none flex h-[42px] items-center gap-1 overflow-x-auto">
@@ -337,11 +351,9 @@ export default function NavbarContent() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenu && (
         <div className="border-t border-gray-100 bg-white shadow-md lg:hidden">
           <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-5 sm:py-3.5 md:px-7">
-            {/* Categories */}
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 md:grid-cols-4">
               {loading ? (
                 Array.from({ length: 8 }).map((_, index) => (
@@ -381,7 +393,6 @@ export default function NavbarContent() {
               )}
             </div>
 
-            {/* Mobile Auth */}
             <div className="mt-3 border-t border-gray-100 pt-3 sm:mt-3.5 sm:pt-3.5">
               {isPending ? (
                 <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
@@ -404,9 +415,17 @@ export default function NavbarContent() {
               ) : user ? (
                 <div>
                   <div className="mb-3 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
-                      {getInitial(user.name)}
-                    </div>
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.name || "User"}
+                        className="h-9 w-9 shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#008a48] text-sm font-semibold text-white">
+                        {getInitial(user.name)}
+                      </div>
+                    )}
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-gray-800">

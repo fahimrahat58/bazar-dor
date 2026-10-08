@@ -49,6 +49,8 @@ export default function SignUpPage() {
 
     setLoading(true);
 
+    const toastId = toast.loading("অ্যাকাউন্ট তৈরি করা হচ্ছে...");
+
     try {
       const { data, error } = await signUp.email({
         name: formData.name.trim(),
@@ -57,11 +59,13 @@ export default function SignUpPage() {
       });
 
       if (error) {
+        toast.dismiss(toastId);
         toast.error(error.message || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে");
         return;
       }
 
       if (data) {
+        toast.dismiss(toastId);
         toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
 
         setFormData({
@@ -70,9 +74,15 @@ export default function SignUpPage() {
           password: "",
           confirmPassword: "",
         });
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 700);
       }
     } catch (error) {
       console.error(error);
+
+      toast.dismiss(toastId);
       toast.error("অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে");
     } finally {
       setLoading(false);
@@ -80,7 +90,7 @@ export default function SignUpPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    if (googleLoading || githubLoading) return;
+    if (googleLoading || githubLoading || loading) return;
 
     setGoogleLoading(true);
 
@@ -94,11 +104,14 @@ export default function SignUpPage() {
 
       if (error) {
         toast.dismiss(toastId);
-        toast.error(error.message || "Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
+        toast.error(
+          error.message || "Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
+        );
         setGoogleLoading(false);
       }
     } catch (error) {
       console.error(error);
+
       toast.dismiss(toastId);
       toast.error("Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
       setGoogleLoading(false);
@@ -106,7 +119,7 @@ export default function SignUpPage() {
   };
 
   const handleGitHubSignIn = async () => {
-    if (googleLoading || githubLoading) return;
+    if (googleLoading || githubLoading || loading) return;
 
     setGithubLoading(true);
 
@@ -120,11 +133,14 @@ export default function SignUpPage() {
 
       if (error) {
         toast.dismiss(toastId);
-        toast.error(error.message || "GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
+        toast.error(
+          error.message || "GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
+        );
         setGithubLoading(false);
       }
     } catch (error) {
       console.error(error);
+
       toast.dismiss(toastId);
       toast.error("GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
       setGithubLoading(false);
@@ -228,7 +244,7 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || googleLoading || githubLoading}
               className="mt-1 h-10 w-full rounded-xl bg-[#008a48] px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#00753d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-sm"
             >
               {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
@@ -249,7 +265,7 @@ export default function SignUpPage() {
             <button
               onClick={handleGoogleSignIn}
               type="button"
-              disabled={googleLoading || githubLoading}
+              disabled={googleLoading || githubLoading || loading}
               className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-[11px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-xs"
             >
               <svg
@@ -285,7 +301,7 @@ export default function SignUpPage() {
             <button
               onClick={handleGitHubSignIn}
               type="button"
-              disabled={googleLoading || githubLoading}
+              disabled={googleLoading || githubLoading || loading}
               className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-[11px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-xs"
             >
               <svg

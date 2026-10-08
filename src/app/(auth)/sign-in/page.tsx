@@ -42,6 +42,8 @@ export default function SignInPage() {
 
     setLoading(true);
 
+    const toastId = toast.loading("সাইন ইন করা হচ্ছে...");
+
     try {
       const { data, error } = await signIn.email({
         email: formData.email.trim(),
@@ -51,20 +53,28 @@ export default function SignInPage() {
       });
 
       if (error) {
+        toast.dismiss(toastId);
         toast.error(error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
         return;
       }
 
       if (data) {
+        toast.dismiss(toastId);
         toast.success("সফলভাবে সাইন ইন হয়েছে!");
 
         setFormData({
           email: "",
           password: "",
         });
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
       }
     } catch (error) {
       console.error(error);
+
+      toast.dismiss(toastId);
       toast.error("সাইন ইন করতে সমস্যা হয়েছে");
     } finally {
       setLoading(false);
@@ -86,11 +96,14 @@ export default function SignInPage() {
 
       if (error) {
         toast.dismiss(toastId);
-        toast.error(error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+        toast.error(
+          error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে"
+        );
         setGoogleLoading(false);
       }
     } catch (error) {
       console.error(error);
+
       toast.dismiss(toastId);
       toast.error("Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
       setGoogleLoading(false);
@@ -112,11 +125,14 @@ export default function SignInPage() {
 
       if (error) {
         toast.dismiss(toastId);
-        toast.error(error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+        toast.error(
+          error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে"
+        );
         setGithubLoading(false);
       }
     } catch (error) {
       console.error(error);
+
       toast.dismiss(toastId);
       toast.error("GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
       setGithubLoading(false);
