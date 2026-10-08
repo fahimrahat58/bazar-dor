@@ -65,23 +65,21 @@ export default function ProductMarquee() {
           {Array.from({ length: 7 }).map((_, index) => (
             <div
               key={index}
-              className="mx-3 inline-flex shrink-0 items-center gap-1.5 py-1 sm:mx-4 sm:gap-2"
+              className="mx-3 inline-flex shrink-0 items-center gap-2 py-1 sm:mx-4"
             >
-              {/* Icon skeleton */}
-              <div className="h-4 w-4 animate-pulse rounded bg-slate-200 sm:h-5 sm:w-5" />
+              <div className="h-8 w-8 animate-pulse rounded-md bg-slate-200" />
 
-              {/* Product name skeleton */}
               <div
                 className="h-3 animate-pulse rounded bg-slate-200 sm:h-3.5"
                 style={{
-                  width: `${index % 3 === 0 ? 72 : index % 2 === 0 ? 88 : 64}px`,
+                  width: `${
+                    index % 3 === 0 ? 72 : index % 2 === 0 ? 88 : 64
+                  }px`,
                 }}
               />
 
-              {/* Price skeleton */}
               <div className="h-3 w-16 animate-pulse rounded bg-slate-100 sm:h-3.5 sm:w-20" />
 
-              {/* Change skeleton */}
               <div className="h-3 w-10 animate-pulse rounded bg-slate-100 sm:h-3.5 sm:w-12" />
             </div>
           ))}
@@ -104,13 +102,22 @@ export default function ProductMarquee() {
         <div
           key={`${copy ? "copy-" : ""}${item.id}-${index}`}
           aria-hidden={copy || undefined}
-          className="mx-3 inline-flex shrink-0 flex-nowrap items-center gap-1.5 whitespace-nowrap py-1 text-xs text-slate-700 sm:mx-4 sm:gap-2 sm:text-sm"
+          className="mx-3 inline-flex shrink-0 flex-nowrap items-center gap-2 whitespace-nowrap py-1 text-xs text-slate-700 sm:mx-4 sm:gap-2.5 sm:text-sm"
         >
-          <span>{item.categoryIcon || "🛒"}</span>
+          {item.image ? (
+            <img
+              src={item.image}
+              alt={item.nameBn}
+              loading="lazy"
+              className="h-8 w-8 shrink-0 rounded-md border border-slate-200 bg-white object-cover sm:h-9 sm:w-9"
+            />
+          ) : (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white text-lg sm:h-9 sm:w-9">
+              {item.categoryIcon || "🛒"}
+            </span>
+          )}
 
-          <span className="font-semibold text-slate-900">
-            {item.nameBn}
-          </span>
+          <span className="font-semibold text-slate-900">{item.nameBn}</span>
 
           <span className="text-slate-600">
             ৳{item.today}/{item.unit}
@@ -119,11 +126,7 @@ export default function ProductMarquee() {
           {item.change && item.change.dir !== "flat" && (
             <span
               className={`font-bold ${
-                isUp
-                  ? "text-red-600"
-                  : isDown
-                    ? "text-green-600"
-                    : ""
+                isUp ? "text-red-600" : isDown ? "text-green-600" : ""
               }`}
             >
               {isUp ? "▲" : "▼"} {pct}%
@@ -140,10 +143,7 @@ export default function ProductMarquee() {
           {renderProducts(products)}
         </div>
 
-        <div
-          className="flex w-max shrink-0 flex-nowrap"
-          aria-hidden="true"
-        >
+        <div className="flex w-max shrink-0 flex-nowrap" aria-hidden="true">
           {renderProducts(products, true)}
         </div>
       </div>
