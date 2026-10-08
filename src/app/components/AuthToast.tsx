@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from "react";
@@ -15,17 +16,11 @@ export default function AuthToast() {
         duration: 3000,
       });
 
-      window.history.replaceState({}, "", window.location.pathname);
-
-      return;
-    }
-
-    if (message === "login-success") {
-      toast.success("সফলভাবে সাইন ইন হয়েছে!", {
-        duration: 3000,
-      });
-
-      window.history.replaceState({}, "", window.location.pathname);
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname,
+      );
 
       return;
     }
@@ -35,7 +30,11 @@ export default function AuthToast() {
         duration: 3000,
       });
 
-      window.history.replaceState({}, "", window.location.pathname);
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname,
+      );
 
       return;
     }
@@ -45,9 +44,11 @@ export default function AuthToast() {
         duration: 3000,
       });
 
-      window.history.replaceState({}, "", window.location.pathname);
-
-      return;
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname,
+      );
     }
   }, []);
 
