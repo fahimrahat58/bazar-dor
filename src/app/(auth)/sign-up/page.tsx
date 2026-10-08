@@ -66,7 +66,7 @@ export default function SignUpPage() {
 
       if (data) {
         toast.dismiss(toastId);
-        toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
+        toast.success("সাইন ইন সফল হয়েছে!");
 
         setFormData({
           name: "",

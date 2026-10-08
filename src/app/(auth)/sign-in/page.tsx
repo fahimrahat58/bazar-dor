@@ -60,7 +60,8 @@ export default function SignInPage() {
 
       if (data) {
         toast.dismiss(toastId);
-        toast.success("সফলভাবে সাইন ইন হয়েছে!");
+
+        toast.success("সাইন ইন সফল হয়েছে!");
 
         setFormData({
           email: "",
@@ -69,7 +70,7 @@ export default function SignInPage() {
 
         setTimeout(() => {
           window.location.href = "/";
-        }, 500);
+        }, 700);
       }
     } catch (error) {
       console.error(error);
