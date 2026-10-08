@@ -69,7 +69,9 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
+        toast.error(
+          error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়",
+        );
 
         setLoading(false);
         return;
@@ -77,16 +79,23 @@ export default function SignInPage() {
 
       toast.dismiss(toastId);
 
-      sessionStorage.setItem("auth-success", "signin");
+      toast.success("সাইন ইন সফল হয়েছে!", {
+        duration: 3000,
+      });
 
-      router.replace(callbackUrl);
+      setTimeout(() => {
+        router.replace(callbackUrl);
+      }, 500);
+
     } catch (error) {
       console.error("SIGN IN ERROR:", error);
 
       toast.dismiss(toastId);
 
       toast.error(
-        error instanceof Error ? error.message : "সাইন ইন করতে সমস্যা হয়েছে",
+        error instanceof Error
+          ? error.message
+          : "সাইন ইন করতে সমস্যা হয়েছে",
       );
 
       setLoading(false);
@@ -98,7 +107,9 @@ export default function SignInPage() {
 
     setGoogleLoading(true);
 
-    const toastId = toast.loading("Google দিয়ে সাইন ইন করা হচ্ছে...");
+    const toastId = toast.loading(
+      "Google দিয়ে সাইন ইন করা হচ্ছে...",
+    );
 
     try {
       const { error } = await signIn.social({
@@ -110,7 +121,10 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+        toast.error(
+          error.message ||
+            "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
+        );
 
         setGoogleLoading(false);
         return;
@@ -135,7 +149,9 @@ export default function SignInPage() {
 
     setGithubLoading(true);
 
-    const toastId = toast.loading("GitHub দিয়ে সাইন ইন করা হচ্ছে...");
+    const toastId = toast.loading(
+      "GitHub দিয়ে সাইন ইন করা হচ্ছে...",
+    );
 
     try {
       const { error } = await signIn.social({
@@ -147,7 +163,10 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
+        toast.error(
+          error.message ||
+            "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
+        );
 
         setGithubLoading(false);
         return;
@@ -181,7 +200,10 @@ export default function SignInPage() {
         </div>
 
         <div className="w-full min-w-0 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 md:p-6">
-          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-3.5 sm:space-y-4"
+          >
             <div>
               <label
                 htmlFor="email"
@@ -224,10 +246,14 @@ export default function SignInPage() {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                   disabled={loading}
                   aria-label={
-                    showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
+                    showPassword
+                      ? "পাসওয়ার্ড লুকান"
+                      : "পাসওয়ার্ড দেখুন"
                   }
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
                 >
@@ -242,10 +268,16 @@ export default function SignInPage() {
 
             <button
               type="submit"
-              disabled={loading || googleLoading || githubLoading}
+              disabled={
+                loading ||
+                googleLoading ||
+                githubLoading
+              }
               className="mt-1.5 flex h-10 w-full cursor-pointer items-center justify-center rounded-xl bg-[#008a48] px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#00753d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-sm"
             >
-              {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
+              {loading
+                ? "সাইন ইন হচ্ছে..."
+                : "সাইন ইন"}
             </button>
           </form>
 
@@ -263,7 +295,11 @@ export default function SignInPage() {
             <button
               onClick={handleGoogleSignIn}
               type="button"
-              disabled={googleLoading || githubLoading || loading}
+              disabled={
+                googleLoading ||
+                githubLoading ||
+                loading
+              }
               className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
             >
               <svg
@@ -302,7 +338,11 @@ export default function SignInPage() {
             <button
               onClick={handleGitHubSignIn}
               type="button"
-              disabled={googleLoading || githubLoading || loading}
+              disabled={
+                googleLoading ||
+                githubLoading ||
+                loading
+              }
               className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-2 text-xs font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
             >
               <svg
@@ -310,7 +350,7 @@ export default function SignInPage() {
                 className="h-4 w-4 shrink-0 fill-[#181717] sm:h-[18px] sm:w-[18px]"
                 aria-hidden="true"
               >
-                <path d="M12 .3a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.84 1.23 1.84 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .3Z" />
+                <path d="M12 .3a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.84 1.23 1.84 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.65 1.65.24 2.87.12 3.17.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .3Z" />
               </svg>
 
               <span className="truncate">
