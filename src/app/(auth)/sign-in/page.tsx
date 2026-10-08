@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { signIn } from "@/app/lib/auth-client";
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -26,7 +28,9 @@ export default function SignInPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
     e.preventDefault();
 
     if (!formData.email.trim()) {
@@ -50,7 +54,9 @@ export default function SignInPage() {
 
     setLoading(true);
 
-    const loadingToastId = toast.loading("সাইন ইন করা হচ্ছে...");
+    const loadingToastId = toast.loading(
+      "সাইন ইন করা হচ্ছে...",
+    );
 
     try {
       const result = await signIn.email({
@@ -64,9 +70,13 @@ export default function SignInPage() {
       if (result.error) {
         toast.dismiss(loadingToastId);
 
-        toast.error(result.error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়", {
-          duration: 3000,
-        });
+        toast.error(
+          result.error.message ||
+            "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়",
+          {
+            duration: 3000,
+          },
+        );
 
         setLoading(false);
         return;
@@ -89,7 +99,9 @@ export default function SignInPage() {
       toast.dismiss(loadingToastId);
 
       toast.error(
-        error instanceof Error ? error.message : "সাইন ইন করতে সমস্যা হয়েছে",
+        error instanceof Error
+          ? error.message
+          : "সাইন ইন করতে সমস্যা হয়েছে",
         {
           duration: 3000,
         },
@@ -106,7 +118,9 @@ export default function SignInPage() {
 
     setGoogleLoading(true);
 
-    const loadingToastId = toast.loading("Google দিয়ে সাইন ইন করা হচ্ছে...");
+    const loadingToastId = toast.loading(
+      "Google দিয়ে সাইন ইন করা হচ্ছে...",
+    );
 
     try {
       const { error } = await signIn.social({
@@ -118,9 +132,13 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(loadingToastId);
 
-        toast.error(error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে", {
-          duration: 3000,
-        });
+        toast.error(
+          error.message ||
+            "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
+          {
+            duration: 3000,
+          },
+        );
 
         setGoogleLoading(false);
       }
@@ -149,7 +167,9 @@ export default function SignInPage() {
 
     setGithubLoading(true);
 
-    const loadingToastId = toast.loading("GitHub দিয়ে সাইন ইন করা হচ্ছে...");
+    const loadingToastId = toast.loading(
+      "GitHub দিয়ে সাইন ইন করা হচ্ছে...",
+    );
 
     try {
       const { error } = await signIn.social({
@@ -161,9 +181,13 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(loadingToastId);
 
-        toast.error(error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে", {
-          duration: 3000,
-        });
+        toast.error(
+          error.message ||
+            "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
+          {
+            duration: 3000,
+          },
+        );
 
         setGithubLoading(false);
       }
@@ -198,7 +222,10 @@ export default function SignInPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <div>
             <label
               htmlFor="email"
@@ -243,7 +270,9 @@ export default function SignInPage() {
 
               <button
                 type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
+                onClick={() =>
+                  setShowPassword((prev) => !prev)
+                }
                 disabled={loading}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-800"
               >
@@ -263,7 +292,11 @@ export default function SignInPage() {
 
           <button
             type="submit"
-            disabled={loading || googleLoading || githubLoading}
+            disabled={
+              loading ||
+              googleLoading ||
+              githubLoading
+            }
             className="w-full rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "সাইন ইন করা হচ্ছে..." : "সাইন ইন"}
@@ -273,7 +306,9 @@ export default function SignInPage() {
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-gray-200" />
 
-          <span className="text-xs text-gray-400">অথবা</span>
+          <span className="text-xs text-gray-400">
+            অথবা
+          </span>
 
           <div className="h-px flex-1 bg-gray-200" />
         </div>
@@ -282,10 +317,16 @@ export default function SignInPage() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={loading || googleLoading || githubLoading}
+            disabled={
+              loading ||
+              googleLoading ||
+              githubLoading
+            }
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className="text-base font-bold">G</span>
+            <span className="text-base font-bold">
+              G
+            </span>
 
             {googleLoading
               ? "Google দিয়ে সাইন ইন হচ্ছে..."
@@ -295,10 +336,16 @@ export default function SignInPage() {
           <button
             type="button"
             onClick={handleGithubSignIn}
-            disabled={loading || googleLoading || githubLoading}
+            disabled={
+              loading ||
+              googleLoading ||
+              githubLoading
+            }
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className="text-base font-bold">GitHub</span>
+            <span className="text-base font-bold">
+              GitHub
+            </span>
 
             {githubLoading
               ? "GitHub দিয়ে সাইন ইন হচ্ছে..."
