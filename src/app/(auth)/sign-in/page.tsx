@@ -226,12 +226,6 @@ export default function SignInPage() {
                 >
                   পাসওয়ার্ড
                 </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-emerald-700 hover:underline"
-                >
-                  পাসওয়ার্ড ভুলে গেছেন?
-                </Link>
               </div>
 
               <div className="relative">
