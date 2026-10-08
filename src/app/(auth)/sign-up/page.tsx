@@ -65,9 +65,7 @@ export default function SignUpPage() {
       toast.dismiss(toastId);
 
       if (error) {
-        toast.error(
-          error.message || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে"
-        );
+        toast.error(error.message || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে");
         setLoading(false);
         return;
       }
@@ -101,9 +99,7 @@ export default function SignUpPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(
-          error.message || "Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
-        );
+        toast.error(error.message || "Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
 
         setGoogleLoading(false);
       }
@@ -133,9 +129,7 @@ export default function SignUpPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(
-          error.message || "GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
-        );
+        toast.error(error.message || "GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
 
         setGithubLoading(false);
       }
@@ -263,9 +257,7 @@ export default function SignUpPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   disabled={loading}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
                   aria-label={
@@ -286,11 +278,9 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading || googleLoading || githubLoading}
-              className="mt-1 h-10 w-full rounded-xl bg-[#008a48] px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#00753d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-sm"
+              className="mt-1 h-10 w-full rounded-xl cursor-pointer bg-[#008a48] px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#00753d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-sm"
             >
-              {loading
-                ? "অ্যাকাউন্ট তৈরি হচ্ছে..."
-                : "অ্যাকাউন্ট তৈরি করুন"}
+              {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
             </button>
           </form>
 
@@ -309,7 +299,7 @@ export default function SignUpPage() {
               onClick={handleGoogleSignIn}
               type="button"
               disabled={googleLoading || githubLoading || loading}
-              className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-[11px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-xs"
+              className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-[11px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-xs"
             >
               <svg
                 className="h-3.5 w-3.5 shrink-0"
@@ -345,7 +335,7 @@ export default function SignUpPage() {
               onClick={handleGitHubSignIn}
               type="button"
               disabled={googleLoading || githubLoading || loading}
-              className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-[11px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-xs"
+              className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-2 text-[11px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:text-xs"
             >
               <svg
                 className="h-3.5 w-3.5 shrink-0 fill-current text-gray-900"
