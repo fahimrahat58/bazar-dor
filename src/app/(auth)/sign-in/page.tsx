@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "@/app/lib/auth-client";
 
 export default function SignInPage() {
@@ -14,6 +15,7 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -184,16 +186,34 @@ export default function SignInPage() {
                 পাসওয়ার্ড
               </label>
 
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="কমপক্ষে ৮ অক্ষর"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-                className="mt-1.5 block h-10 w-full min-w-0 cursor-pointer rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:cursor-not-allowed disabled:bg-gray-50 sm:h-11 sm:px-3.5 sm:text-sm"
-              />
+              <div className="relative mt-1.5">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="কমপক্ষে ৮ অক্ষর"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="block h-10 w-full min-w-0 cursor-pointer rounded-xl border border-gray-200 bg-white px-3 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:cursor-not-allowed disabled:bg-gray-50 sm:h-11 sm:px-3.5 sm:pr-11 sm:text-sm"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  aria-label={
+                    showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                  ) : (
+                    <Eye className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
