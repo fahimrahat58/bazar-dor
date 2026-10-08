@@ -69,9 +69,7 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(
-          error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়",
-        );
+        toast.error(error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
 
         setLoading(false);
         return;
@@ -88,9 +86,7 @@ export default function SignInPage() {
       toast.dismiss(toastId);
 
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "সাইন ইন করতে সমস্যা হয়েছে",
+        error instanceof Error ? error.message : "সাইন ইন করতে সমস্যা হয়েছে",
       );
 
       setLoading(false);
@@ -114,9 +110,7 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(
-          error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
-        );
+        toast.error(error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
 
         setGoogleLoading(false);
         return;
@@ -153,9 +147,7 @@ export default function SignInPage() {
       if (error) {
         toast.dismiss(toastId);
 
-        toast.error(
-          error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে",
-        );
+        toast.error(error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে");
 
         setGithubLoading(false);
         return;
@@ -235,9 +227,7 @@ export default function SignInPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                   aria-label={
-                    showPassword
-                      ? "পাসওয়ার্ড লুকান"
-                      : "পাসওয়ার্ড দেখুন"
+                    showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
                   }
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 transition-colors hover:text-gray-700 disabled:cursor-not-allowed"
                 >
@@ -349,6 +339,13 @@ export default function SignInPage() {
           >
             ← হোম পেজে ফিরে যান
           </Link>
+          <button
+            type="button"
+            onClick={() => toast.success("TEST TOAST")}
+            className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-white"
+          >
+            TEST TOAST
+          </button>
         </div>
       </div>
     </main>
