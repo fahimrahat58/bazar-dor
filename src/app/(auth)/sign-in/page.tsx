@@ -49,7 +49,6 @@ export default function SignInPage() {
         email: formData.email.trim(),
         password: formData.password,
         rememberMe: true,
-        callbackURL: "/",
       });
 
       if (error) {
@@ -61,7 +60,9 @@ export default function SignInPage() {
       if (data) {
         toast.dismiss(toastId);
 
-        toast.success("সাইন ইন সফল হয়েছে!");
+        toast.success("সাইন ইন সফল হয়েছে!", {
+          duration: 1500,
+        });
 
         setFormData({
           email: "",
@@ -70,7 +71,7 @@ export default function SignInPage() {
 
         setTimeout(() => {
           window.location.href = "/";
-        }, 700);
+        }, 1500);
       }
     } catch (error) {
       console.error(error);
@@ -230,14 +231,17 @@ export default function SignInPage() {
                   fill="#4285F4"
                   d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3.01h3.87c2.27-2.09 3.56-5.17 3.56-8.66Z"
                 />
+
                 <path
                   fill="#34A853"
                   d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3.01c-1.07.72-2.44 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.95H1.27v3.1A12 12 0 0 0 12 24Z"
                 />
+
                 <path
                   fill="#FBBC05"
                   d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28v-3.1H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38l4-3.1Z"
                 />
+
                 <path
                   fill="#EA4335"
                   d="M12 4.77c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.94 1.15 15.24 0 12 0A12 12 0 0 0 1.27 6.62l4 3.1C6.22 6.88 8.87 4.77 12 4.77Z"
