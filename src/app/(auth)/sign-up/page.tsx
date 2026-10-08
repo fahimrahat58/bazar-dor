@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { signUp } from "@/app/lib/auth-client";
+import { signIn, signUp } from "@/app/lib/auth-client";
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -50,7 +50,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const { data: resData, error } = await signUp.email({
+      const { data, error } = await signUp.email({
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
@@ -61,7 +61,7 @@ export default function SignUpPage() {
         return;
       }
 
-      if (resData) {
+      if (data) {
         toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
 
         setFormData({
@@ -83,7 +83,7 @@ export default function SignUpPage() {
     setGoogleLoading(true);
 
     try {
-      await signUp.social({
+      await signIn.social({
         provider: "google",
         callbackURL: "/",
       });
@@ -98,7 +98,7 @@ export default function SignUpPage() {
     setGithubLoading(true);
 
     try {
-      await signUp.social({
+      await signIn.social({
         provider: "github",
         callbackURL: "/",
       });

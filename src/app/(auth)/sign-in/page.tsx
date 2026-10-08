@@ -43,7 +43,7 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      const { data: resData, error } = await signIn.email({
+      const { data, error } = await signIn.email({
         email: formData.email.trim(),
         password: formData.password,
         rememberMe: true,
@@ -55,7 +55,7 @@ export default function SignInPage() {
         return;
       }
 
-      if (resData) {
+      if (data) {
         toast.success("সফলভাবে সাইন ইন হয়েছে!");
 
         setFormData({
