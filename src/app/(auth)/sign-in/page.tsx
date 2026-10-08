@@ -339,13 +339,6 @@ export default function SignInPage() {
           >
             ← হোম পেজে ফিরে যান
           </Link>
-          <button
-            type="button"
-            onClick={() => toast.success("TEST TOAST")}
-            className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-white"
-          >
-            TEST TOAST
-          </button>
         </div>
       </div>
     </main>
