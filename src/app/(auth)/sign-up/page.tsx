@@ -89,22 +89,28 @@ export default function SignUpPage() {
 
     setGoogleLoading(true);
 
+    const toastId = toast.loading("Google দিয়ে সাইন আপ করা হচ্ছে...");
+
     try {
       const { error } = await signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "/?auth=signin",
+        newUserCallbackURL: "/?auth=signup",
       });
 
       if (error) {
+        toast.dismiss(toastId);
+
         toast.error(
           error.message || "Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
         );
+
         setGoogleLoading(false);
-        return;
       }
     } catch (error) {
       console.error("Google signup error:", error);
 
+      toast.dismiss(toastId);
       toast.error("Google দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
       setGoogleLoading(false);
     }
@@ -115,22 +121,28 @@ export default function SignUpPage() {
 
     setGithubLoading(true);
 
+    const toastId = toast.loading("GitHub দিয়ে সাইন আপ করা হচ্ছে...");
+
     try {
       const { error } = await signIn.social({
         provider: "github",
-        callbackURL: "/",
+        callbackURL: "/?auth=signin",
+        newUserCallbackURL: "/?auth=signup",
       });
 
       if (error) {
+        toast.dismiss(toastId);
+
         toast.error(
           error.message || "GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে"
         );
+
         setGithubLoading(false);
-        return;
       }
     } catch (error) {
       console.error("GitHub signup error:", error);
 
+      toast.dismiss(toastId);
       toast.error("GitHub দিয়ে সাইন আপ করতে সমস্যা হয়েছে");
       setGithubLoading(false);
     }
@@ -367,7 +379,7 @@ export default function SignUpPage() {
             href="/"
             className="text-[11px] font-medium text-gray-600 underline transition-colors hover:text-gray-900 sm:text-xs"
           >
-            ← হোম পেজে ফিরে যানss
+            ← হোম পেজে ফিরে যান
           </Link>
         </div>
       </div>

@@ -86,7 +86,8 @@ export default function SignInPage() {
     try {
       const { error } = await signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "/?auth=signin",
+        newUserCallbackURL: "/?auth=signup",
       });
 
       if (error) {
@@ -95,6 +96,7 @@ export default function SignInPage() {
           error.message || "Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে"
         );
         setGoogleLoading(false);
+        return;
       }
     } catch (error) {
       console.error(error);
@@ -115,7 +117,8 @@ export default function SignInPage() {
     try {
       const { error } = await signIn.social({
         provider: "github",
-        callbackURL: "/",
+        callbackURL: "/?auth=signin",
+        newUserCallbackURL: "/?auth=signup",
       });
 
       if (error) {
@@ -124,6 +127,7 @@ export default function SignInPage() {
           error.message || "GitHub দিয়ে সাইন ইন করতে সমস্যা হয়েছে"
         );
         setGithubLoading(false);
+        return;
       }
     } catch (error) {
       console.error(error);
