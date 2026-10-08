@@ -28,9 +28,7 @@ const ProductMarquee = () => {
 
         const data = await response.json();
 
-        const productList = Array.isArray(data)
-          ? data
-          : data.products || [];
+        const productList = Array.isArray(data) ? data : data.products || [];
 
         setProducts(productList);
       } catch (error) {
@@ -45,7 +43,7 @@ const ProductMarquee = () => {
 
   if (loading) {
     return (
-      <div className="w-full border-y border-slate-200 bg-slate-50 px-3 py-2 text-center text-[10px] text-slate-500 sm:px-4 sm:py-2.5 sm:text-xs md:text-sm">
+      <div className="w-full border-y border-slate-200 bg-slate-50 px-3 py-2 text-center text-[10px] text-slate-500 sm:px-4 sm:py-2.5 sm:text-xs md:py-3 md:text-sm">
         আজকের বাজার দর লোড হচ্ছে...
       </div>
     );
@@ -56,7 +54,7 @@ const ProductMarquee = () => {
   }
 
   return (
-    <div className="w-full overflow-hidden border-y border-slate-200 bg-slate-50 py-2 select-none sm:py-2.5 md:py-3">
+    <div className="w-full select-none overflow-hidden border-y border-slate-200 bg-slate-50 py-2 sm:py-2.5 md:py-3">
       <div className="inline-flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused]">
         {products.concat(products).map((item, index) => {
           const isUp = item.change?.dir === "up";
@@ -67,27 +65,34 @@ const ProductMarquee = () => {
             <div
               key={`${item.id}-${index}`}
               className="
+                group
                 inline-flex
                 shrink-0
                 items-center
                 gap-1
                 mx-2.5
+                rounded-md
+                py-0.5
                 text-[10px]
                 font-medium
                 text-slate-700
+                transition-colors
+                duration-200
+                hover:bg-white/70
                 sm:gap-1.5
                 sm:mx-4
+                sm:py-1
                 sm:text-xs
                 md:gap-2
                 md:mx-5
                 md:text-sm
               "
             >
-              <span className="text-xs leading-none sm:text-sm md:text-base">
+              <span className="text-xs leading-none transition-transform duration-200 group-hover:scale-110 sm:text-sm md:text-base">
                 {item.image || item.categoryIcon || "🛒"}
               </span>
 
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 transition-colors duration-200 group-hover:text-[#008a48]">
                 {item.nameBn}
               </span>
 
@@ -97,7 +102,7 @@ const ProductMarquee = () => {
 
               {item.change?.dir !== "flat" && (
                 <span
-                  className={`inline-flex items-center gap-0.5 text-[9px] font-bold sm:text-[10px] md:text-xs ${
+                  className={`inline-flex items-center gap-0.5 text-[9px] font-bold transition-transform duration-200 group-hover:scale-105 sm:text-[10px] md:text-xs ${
                     isUp
                       ? "text-red-600"
                       : isDown

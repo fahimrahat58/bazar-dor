@@ -74,7 +74,7 @@ export default function ProductDetailsPage({
         const slug = resolvedParams.slug;
 
         const allProductsRes = await fetch(
-          "https://api.api-store.workers.dev/api/bazardor/products"
+          "https://api.api-store.workers.dev/api/bazardor/products",
         );
 
         if (!allProductsRes.ok) {
@@ -90,7 +90,7 @@ export default function ProductDetailsPage({
         }
 
         const productRes = await fetch(
-          `https://api.api-store.workers.dev/api/bazardor/products/${foundProduct.id}`
+          `https://api.api-store.workers.dev/api/bazardor/products/${foundProduct.id}`,
         );
 
         if (!productRes.ok) {
@@ -124,16 +124,16 @@ export default function ProductDetailsPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] px-3 py-5 sm:px-5 sm:py-7 lg:px-6">
+      <div className="min-h-screen bg-[#F8F9FA] px-3 py-5 sm:px-5 sm:py-7 md:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl animate-pulse space-y-5 sm:space-y-6">
           <div className="h-8 w-full rounded-xl bg-gray-200 sm:h-10" />
 
-          <div className="h-48 rounded-2xl bg-gray-200 sm:h-52 lg:h-56" />
+          <div className="h-48 rounded-2xl bg-gray-200 sm:h-52 md:h-56" />
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             <div className="h-28 rounded-2xl bg-gray-200" />
             <div className="h-28 rounded-2xl bg-gray-200" />
-            <div className="h-28 rounded-2xl bg-gray-200" />
+            <div className="h-28 rounded-2xl bg-gray-200 sm:col-span-2 lg:col-span-1" />
           </div>
 
           <div className="h-72 rounded-2xl bg-gray-200 sm:h-80" />
@@ -158,7 +158,7 @@ export default function ProductDetailsPage({
 
           <Link
             href="/"
-            className="mt-5 inline-flex rounded-lg bg-[#0F9D58] px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-emerald-700"
+            className="mt-5 inline-flex rounded-lg bg-[#0F9D58] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md active:translate-y-0"
           >
             হোমে ফিরে যান
           </Link>
@@ -202,9 +202,11 @@ export default function ProductDetailsPage({
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA] text-[#3C4043]">
       <div className="mx-auto w-full max-w-5xl px-3 py-5 sm:px-5 sm:py-7 md:px-6 lg:px-8 lg:py-8">
-        {/* Breadcrumb */}
         <nav className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 sm:mb-5 sm:text-sm">
-          <Link href="/" className="transition hover:text-emerald-700">
+          <Link
+            href="/"
+            className="rounded transition-colors hover:text-emerald-700"
+          >
             হোম
           </Link>
 
@@ -212,31 +214,30 @@ export default function ProductDetailsPage({
 
           <Link
             href={`/category/${product.category}`}
-            className="transition hover:text-emerald-700"
+            className="rounded transition-colors hover:text-emerald-700"
           >
             {product.categoryNameBn}
           </Link>
 
           <span className="text-gray-400">›</span>
 
-          <span className="max-w-[180px] truncate font-medium text-gray-800 sm:max-w-xs md:max-w-md">
+          <span className="max-w-[160px] truncate font-medium text-gray-800 sm:max-w-xs md:max-w-md">
             {product.nameBn}
           </span>
         </nav>
 
-        {/* Hero */}
-        <section className="mb-5 rounded-2xl bg-[#F3F4F6]/90 p-4 sm:mb-6 sm:rounded-3xl sm:p-6 md:p-7 lg:p-8">
+        <section className="group mb-5 rounded-2xl bg-[#F3F4F6]/90 p-4 transition-all duration-200 hover:bg-[#F0F1F3] hover:shadow-sm sm:mb-6 sm:rounded-3xl sm:p-6 md:p-7 lg:p-8">
           <div className="flex flex-col gap-5 sm:gap-6 md:flex-row md:items-center md:justify-between">
             {/* Product Info */}
             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-amber-100/70 sm:h-16 sm:w-16 sm:rounded-2xl md:h-20 md:w-20">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-amber-100/70 transition-transform duration-200 group-hover:scale-[1.03] sm:h-16 sm:w-16 sm:rounded-2xl md:h-20 md:w-20">
                 <span className="text-3xl leading-none sm:text-4xl md:text-5xl">
                   {productEmoji}
                 </span>
               </div>
 
               <div className="min-w-0">
-                <h1 className="break-words text-xl font-bold leading-tight text-gray-900 sm:text-2xl md:text-3xl">
+                <h1 className="break-words text-xl font-bold leading-tight text-gray-900 transition-colors duration-200 group-hover:text-[#008a48] sm:text-2xl md:text-3xl">
                   {product.nameBn}
                 </h1>
 
@@ -255,7 +256,6 @@ export default function ProductDetailsPage({
               </div>
             </div>
 
-            {/* Price */}
             <div className="w-full shrink-0 border-t border-gray-200 pt-4 text-left sm:pt-0 md:w-auto md:border-t-0 md:text-right">
               <div className="text-2xl font-black leading-tight text-gray-900 sm:text-3xl md:text-4xl">
                 {toBengaliNumber(product.today)}{" "}
@@ -271,7 +271,6 @@ export default function ProductDetailsPage({
                   }`}
                 >
                   <span>{isUp ? "▲" : "▼"}</span>
-
                   <span>{toBengaliNumber(product.change.pct)}%</span>
                 </div>
               ) : (
@@ -283,18 +282,18 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
-        {/* Summary */}
         <section className="mb-7 sm:mb-8">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:mb-4 sm:text-lg">
             দামের সারসংক্ষেপ
           </h2>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            {/* Minimum */}
-            <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md sm:rounded-2xl sm:p-5">
-              <p className="text-xs font-medium text-gray-400">সর্বনিম্ন দাম</p>
+            <div className="group rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-100 hover:shadow-md sm:rounded-2xl sm:p-5">
+              <p className="text-xs font-medium text-gray-400 transition-colors group-hover:text-gray-500">
+                সর্বনিম্ন দাম
+              </p>
 
-              <div className="mt-2 text-xl font-black text-[#0F9D58] sm:text-2xl">
+              <div className="mt-2 text-xl font-black text-[#0F9D58] transition-colors group-hover:text-[#008a48] sm:text-2xl">
                 {toBengaliNumber(minPrice)}{" "}
                 <span className="text-sm font-medium sm:text-base">টাকা</span>
               </div>
@@ -304,9 +303,10 @@ export default function ProductDetailsPage({
               </p>
             </div>
 
-            {/* Maximum */}
-            <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md sm:rounded-2xl sm:p-5">
-              <p className="text-xs font-medium text-gray-400">সর্বাধিক দাম</p>
+            <div className="group rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-100 hover:shadow-md sm:rounded-2xl sm:p-5">
+              <p className="text-xs font-medium text-gray-400 transition-colors group-hover:text-gray-500">
+                সর্বাধিক দাম
+              </p>
 
               <div className="mt-2 text-xl font-black text-red-500 sm:text-2xl">
                 {toBengaliNumber(maxPrice)}{" "}
@@ -318,11 +318,12 @@ export default function ProductDetailsPage({
               </p>
             </div>
 
-            {/* Average */}
-            <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md sm:col-span-2 sm:p-5 lg:col-span-1">
-              <p className="text-xs font-medium text-gray-400">গড় দাম</p>
+            <div className="group rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-100 hover:shadow-md sm:col-span-2 sm:p-5 lg:col-span-1">
+              <p className="text-xs font-medium text-gray-400 transition-colors group-hover:text-gray-500">
+                গড় দাম
+              </p>
 
-              <div className="mt-2 text-xl font-black text-[#0F9D58] sm:text-2xl">
+              <div className="mt-2 text-xl font-black text-[#0F9D58] transition-colors group-hover:text-[#008a48] sm:text-2xl">
                 {toBengaliNumber(totalAvg.toFixed(2))}{" "}
                 <span className="text-sm font-medium sm:text-base">টাকা</span>
               </div>
@@ -334,13 +335,12 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
-        {/* Market Table */}
         <section className="mb-8 sm:mb-10">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:mb-4 sm:text-lg">
             বাজারভিত্তিক আজকের দাম
           </h2>
 
-          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm sm:rounded-2xl">
+          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md sm:rounded-2xl">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[600px] text-left text-xs sm:text-sm">
                 <thead>
@@ -374,7 +374,7 @@ export default function ProductDetailsPage({
                     return (
                       <tr
                         key={`${m.market}-${idx}`}
-                        className="odd:bg-[#F0F2EF] even:bg-white"
+                        className="odd:bg-[#F0F2EF] even:bg-white transition-colors duration-150 hover:bg-green-50"
                       >
                         <td className="whitespace-nowrap px-4 py-3.5 font-medium text-gray-900 sm:px-6 sm:py-4">
                           {m.market}
@@ -404,15 +404,18 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
-        {/* Category Link */}
         <div className="mb-6 sm:mb-8">
           <Link
             href={`/category/${product.category}`}
-            className="inline-flex items-center gap-2 rounded-lg py-2 text-sm font-bold text-gray-900 transition hover:text-emerald-600 sm:text-base"
+            className="group inline-flex items-center gap-2 rounded-lg py-2 text-sm font-bold text-gray-900 transition-all duration-200 hover:text-emerald-600 sm:text-base"
           >
-            <span className="text-lg">{product.categoryIcon}</span>
+            <span className="text-lg transition-transform duration-200 group-hover:scale-110">
+              {product.categoryIcon}
+            </span>
 
-            <span>সব {product.categoryNameBn}</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+              সব {product.categoryNameBn}
+            </span>
           </Link>
         </div>
       </div>
