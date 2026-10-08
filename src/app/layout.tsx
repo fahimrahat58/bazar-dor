@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "./components/navbar";
 import ProductMarquee from "./components/marquee";
 import Footer from "./components/Footer";
-import AuthToast from "./components/auth-toast";
+import AuthToast from "./components/AuthToast";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {

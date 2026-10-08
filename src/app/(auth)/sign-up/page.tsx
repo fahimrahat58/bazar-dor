@@ -367,7 +367,7 @@ export default function SignUpPage() {
             href="/"
             className="text-[11px] font-medium text-gray-600 underline transition-colors hover:text-gray-900 sm:text-xs"
           >
-            ← হোম পেজে ফিরে যান
+            ← হোম পেজে ফিরে যানss
           </Link>
         </div>
       </div>
