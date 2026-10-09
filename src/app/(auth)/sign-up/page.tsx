@@ -72,7 +72,7 @@ export default function SignUpPage() {
 
       sessionStorage.setItem("auth-success", "signup");
 
-      window.location.replace("/");
+      window.location.replace("/sign-in");
     } catch (error) {
       console.error("Signup error:", error);
 
