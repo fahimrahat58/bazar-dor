@@ -188,8 +188,10 @@ export default function ProductDetailsPage({
 
   const totalAvg =
     product.markets.length > 0
-      ? product.markets.reduce((acc, m) => acc + (m.min + m.max) / 2, 0) /
-        product.markets.length
+      ? product.markets.reduce(
+          (acc, m) => acc + (m.min + m.max) / 2,
+          0,
+        ) / product.markets.length
       : 0;
 
   const isUp = product.change.dir === "up";
@@ -197,7 +199,8 @@ export default function ProductDetailsPage({
   const isFlat = product.change.dir === "flat";
 
   const unitText = getUnitText(product.unit);
-  const productEmoji = product.image?.trim() || product.categoryIcon || "🥛";
+  const productEmoji =
+    product.image?.trim() || product.categoryIcon || "🥛";
 
   return (
     <div className="min-h-screen bg-[#F4F6F4] text-[#2C3E50]">
@@ -218,6 +221,7 @@ export default function ProductDetailsPage({
           <span className="font-medium text-gray-800">{product.nameBn}</span>
         </nav>
 
+        {/* Product Header Card */}
         <section className="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-xs sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
@@ -247,22 +251,25 @@ export default function ProductDetailsPage({
               </div>
             </div>
 
+            {/* Right Side Price Box */}
             <div className="flex shrink-0 flex-col items-start rounded-xl border border-gray-100 bg-[#F9FAF9] p-3 text-left sm:items-center sm:text-center">
               <span className="text-[11px] font-medium text-gray-400">
                 আজকের দাম
               </span>
               <div className="mt-0.5 text-2xl font-black text-gray-900 sm:text-3xl">
                 {toBengaliNumber(product.today)}
+                <span className="text-sm font-semibold text-gray-600 sm:text-lg">
+                  টাকা / {unitText}
+                </span>
               </div>
-              <span className="text-xs text-gray-500">টাকা / {unitText}</span>
 
               {!isFlat && (
                 <div
-                  className={`mt-1 inline-flex items-center gap-1 text-[11px] font-bold ${
-                    isUp ? "text-red-500" : "text-emerald-600"
+                  className={`mt-1 inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
+                    isUp ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
                   }`}
                 >
-                  <span>{isUp ? "▲" : "▼"}</span>
+                  <span className="text-xs">{isUp ? "▲" : "▼"}</span>
                   <span>{toBengaliNumber(product.change.pct)}%</span>
                 </div>
               )}
@@ -270,12 +277,14 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
+        {/* Summary Cards Section */}
         <section className="mb-6">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:text-lg">
             দামের সারসংক্ষেপ
           </h2>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {/* Min Price */}
             <div className="rounded-xl border border-gray-100 bg-white p-4 text-left shadow-xs">
               <p className="text-xs font-medium text-gray-400">সর্বনিম্ন দাম</p>
               <div className="mt-1 text-xl font-bold text-[#0F9D58] sm:text-2xl">
@@ -287,6 +296,7 @@ export default function ProductDetailsPage({
               </p>
             </div>
 
+            {/* Max Price */}
             <div className="rounded-xl border border-gray-100 bg-white p-4 text-left shadow-xs">
               <p className="text-xs font-medium text-gray-400">সর্বাধিক দাম</p>
               <div className="mt-1 text-xl font-bold text-red-500 sm:text-2xl">
@@ -298,6 +308,7 @@ export default function ProductDetailsPage({
               </p>
             </div>
 
+            {/* Avg Price */}
             <div className="rounded-xl border border-gray-100 bg-white p-4 text-left shadow-xs">
               <p className="text-xs font-medium text-gray-400">গড় দাম</p>
               <div className="mt-1 text-xl font-bold text-[#0F9D58] sm:text-2xl">
@@ -311,6 +322,7 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
+        {/* Market Table Section */}
         <section className="mb-8">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:text-lg">
             বাজারভিত্তিক আজকের দাম
@@ -362,13 +374,14 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
+        {/* Bottom Category Link */}
         <div className="mb-6">
           <Link
             href={`/category/${product.category}`}
-            className="inline-flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-emerald-700"
+            className="inline-flex items-center gap-2.5 text-sm font-bold text-gray-800 hover:text-emerald-700"
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-600 text-xs text-white">
-              ■
+            <span className="text-xl">
+              {product.categoryIcon}
             </span>
             <span>সব {product.categoryNameBn}</span>
           </Link>
