@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import "./globals.css";
 import Navbar from "./components/Navbar/Navbar";
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-screen flex-col">
         <Toaster position="top-center" reverseOrder={false} />
 
-        <AuthToast />
+        <Suspense fallback={null}>
+          <AuthToast />
+        </Suspense>
 
         <Navbar />
 

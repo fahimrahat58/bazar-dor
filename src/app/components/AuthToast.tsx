@@ -1,56 +1,33 @@
-
 "use client";
 
 import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 export default function AuthToast() {
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+  const searchParams = useSearchParams();
 
-    const authType = params.get("auth");
-    const message = params.get("message");
+  useEffect(() => {
+    const message = searchParams.get("message");
+    const authType = searchParams.get("auth");
 
     if (message === "login-required") {
       toast.error("এই পেজটি দেখতে আগে সাইন ইন করুন!", {
-        duration: 3000,
+        duration: 4000,
+        id: "login-required",
       });
-
-      window.history.replaceState(
-        {},
-        "",
-        window.location.pathname,
-      );
-
-      return;
-    }
-
-    if (authType === "signup") {
+    } else if (authType === "signup") {
       toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!", {
         duration: 3000,
+        id: "signup-success",
       });
-
-      window.history.replaceState(
-        {},
-        "",
-        window.location.pathname,
-      );
-
-      return;
-    }
-
-    if (authType === "signin") {
+    } else if (authType === "signin") {
       toast.success("সাইন ইন সফল হয়েছে!", {
         duration: 3000,
+        id: "signin-success",
       });
-
-      window.history.replaceState(
-        {},
-        "",
-        window.location.pathname,
-      );
     }
-  }, []);
+  }, [searchParams]);
 
   return null;
 }
