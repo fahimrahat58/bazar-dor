@@ -237,7 +237,9 @@ export default function ProductDetailsPage({
 
           <span>›</span>
 
-          <span className="font-medium text-gray-800">{product.nameBn}</span>
+          <span className="min-w-0 break-words font-medium text-gray-800">
+            {product.nameBn}
+          </span>
         </nav>
 
         <section className="mb-4 w-full min-w-0 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:mb-5 sm:rounded-2xl sm:p-5 md:mb-6 md:p-6">
@@ -355,58 +357,70 @@ export default function ProductDetailsPage({
           </div>
         </section>
 
-        <section className="mb-6 sm:mb-8">
+        <section className="mb-6 min-w-0 sm:mb-8">
           <h2 className="mb-3 text-base font-bold text-gray-900 sm:text-lg">
             বাজারভিত্তিক আজকের দাম
           </h2>
 
-          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm sm:rounded-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-[#F7F9F7] text-[11px] font-semibold text-gray-600 sm:text-xs">
-                    <th className="px-3.5 py-3 sm:px-5">বাজার</th>
-                    <th className="px-3.5 py-3 sm:px-5">বিভাগ</th>
-                    <th className="px-3.5 py-3 sm:px-5">সর্বনিম্ন</th>
-                    <th className="px-3.5 py-3 sm:px-5">সর্বাধিক</th>
-                    <th className="px-3.5 py-3 text-right sm:px-5">গড়</th>
-                  </tr>
-                </thead>
+          <div className="w-full min-w-0 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm sm:rounded-2xl">
+            <table className="w-full table-fixed text-left text-[10px] sm:text-xs md:text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-[#F7F9F7] text-[9px] font-semibold text-gray-600 sm:text-xs">
+                  <th className="w-[25%] break-words px-1.5 py-3 sm:px-3 md:px-5">
+                    বাজার
+                  </th>
 
-                <tbody className="divide-y divide-gray-100 text-xs text-gray-700 sm:text-sm">
-                  {product.markets.map((m, idx) => {
-                    const avg = ((m.min + m.max) / 2).toFixed(2);
+                  <th className="w-[19%] break-words px-1 py-3 sm:px-3 md:px-5">
+                    বিভাগ
+                  </th>
 
-                    return (
-                      <tr
-                        key={`${m.market}-${idx}`}
-                        className="odd:bg-[#FAFCFA] even:bg-white hover:bg-emerald-50/40"
-                      >
-                        <td className="px-3.5 py-3 font-medium text-gray-900 sm:px-5">
-                          {m.market}
-                        </td>
+                  <th className="w-[18%] break-words px-1 py-3 sm:px-3 md:px-5">
+                    সর্বনিম্ন
+                  </th>
 
-                        <td className="px-3.5 py-3 text-gray-500 sm:px-5">
-                          {m.division}
-                        </td>
+                  <th className="w-[19%] break-words px-1 py-3 sm:px-3 md:px-5">
+                    সর্বাধিক
+                  </th>
 
-                        <td className="px-3.5 py-3 sm:px-5">
-                          {toBengaliNumber(m.min)} টাকা
-                        </td>
+                  <th className="w-[19%] break-words px-1 py-3 text-right sm:px-3 md:px-5">
+                    গড়
+                  </th>
+                </tr>
+              </thead>
 
-                        <td className="px-3.5 py-3 sm:px-5">
-                          {toBengaliNumber(m.max)} টাকা
-                        </td>
+              <tbody className="divide-y divide-gray-100 text-[10px] text-gray-700 sm:text-xs md:text-sm">
+                {product.markets.map((m, idx) => {
+                  const avg = ((m.min + m.max) / 2).toFixed(2);
 
-                        <td className="px-3.5 py-3 text-right font-bold text-gray-900 sm:px-5">
-                          {toBengaliNumber(avg)} টাকা
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                  return (
+                    <tr
+                      key={`${m.market}-${idx}`}
+                      className="odd:bg-[#FAFCFA] even:bg-white transition-colors hover:bg-emerald-50/40"
+                    >
+                      <td className="break-words px-1.5 py-3 font-medium leading-relaxed text-gray-900 sm:px-3 md:px-5">
+                        {m.market}
+                      </td>
+
+                      <td className="break-words px-1 py-3 leading-relaxed text-gray-500 sm:px-3 md:px-5">
+                        {m.division}
+                      </td>
+
+                      <td className="break-words px-1 py-3 leading-relaxed sm:px-3 md:px-5">
+                        {toBengaliNumber(m.min)} টাকা
+                      </td>
+
+                      <td className="break-words px-1 py-3 leading-relaxed sm:px-3 md:px-5">
+                        {toBengaliNumber(m.max)} টাকা
+                      </td>
+
+                      <td className="break-words px-1 py-3 text-right font-bold leading-relaxed text-gray-900 sm:px-3 md:px-5">
+                        {toBengaliNumber(avg)} টাকা
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </section>
 
