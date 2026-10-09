@@ -5,11 +5,11 @@ import LowPrice from "./components/LowPrice";
 
 export default function Home() {
   return (
-    <>
+    <main className="min-h-screen w-full bg-[#f8f9fa]">
       <Banner />
       <HighPrice />
       <LowPrice />
       <AllProducts />
-    </>
+    </main>
   );
 }
