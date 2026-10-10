@@ -77,17 +77,23 @@ function ProductImage({
   image,
   categoryIcon,
   name,
+  size = "large",
 }: {
   image?: string;
   categoryIcon?: string;
   name: string;
+  size?: "small" | "large";
 }) {
   const [imageError, setImageError] = useState(false);
 
   const showImage = isImageUrl(image) && !imageError;
 
   return (
-    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 sm:h-16 sm:w-16">
+    <div
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50 ${
+        size === "small" ? "h-8 w-8" : "h-14 w-14 rounded-xl sm:h-16 sm:w-16"
+      }`}
+    >
       {showImage ? (
         <img
           src={image}
@@ -97,8 +103,12 @@ function ProductImage({
           className="h-full w-full object-contain p-1"
         />
       ) : (
-        <span className="text-2xl" role="img" aria-label={name}>
-          {image || categoryIcon || "🛒"}
+        <span
+          className={size === "small" ? "text-lg" : "text-2xl"}
+          role="img"
+          aria-label={name}
+        >
+          {categoryIcon || image || "🛒"}
         </span>
       )}
     </div>
@@ -295,20 +305,22 @@ export default function BazarCompare() {
                   disabled={products.length === 0}
                   className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-left text-sm outline-none transition hover:border-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span className="min-w-0 flex-1 truncate">
-                    {selectedProduct ? (
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span className="shrink-0">
-                          {selectedProduct.categoryIcon || "🛒"}
-                        </span>
-                        <span className="truncate">
-                          {selectedProduct.nameBn}
-                        </span>
-                      </span>
-                    ) : (
-                      "পণ্য বেছে নিন"
-                    )}
-                  </span>
+                  {selectedProduct ? (
+                    <span className="flex min-w-0 flex-1 items-center gap-2">
+                      <ProductImage
+                        image={selectedProduct.image}
+                        categoryIcon={selectedProduct.categoryIcon}
+                        name={selectedProduct.nameBn}
+                        size="small"
+                      />
+
+                      <span className="truncate">{selectedProduct.nameBn}</span>
+                    </span>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate">
+                      পণ্য বেছে নিন
+                    </span>
+                  )}
 
                   <span
                     className={`shrink-0 text-xs text-gray-400 transition-transform ${
@@ -363,14 +375,23 @@ export default function BazarCompare() {
                                     setIsOpen(false);
                                     setSearchQuery("");
                                   }}
-                                  className={`flex min-h-10 w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
+                                  className={`flex min-h-12 w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                                     isSelected
                                       ? "bg-emerald-50 font-semibold text-emerald-800"
                                       : "text-gray-700 hover:bg-gray-50"
                                   }`}
                                 >
-                                  <span className="min-w-0 flex-1 truncate">
-                                    {product.nameBn}
+                                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                                    <ProductImage
+                                      image={product.image}
+                                      categoryIcon={product.categoryIcon}
+                                      name={product.nameBn}
+                                      size="small"
+                                    />
+
+                                    <span className="truncate">
+                                      {product.nameBn}
+                                    </span>
                                   </span>
 
                                   {isSelected && (
