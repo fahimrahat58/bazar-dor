@@ -57,7 +57,7 @@ export default function HeroBanner() {
                 <button
                   type="button"
                   onClick={handleAllProducts}
-                  className="inline-flex items-center justify-center rounded-lg bg-[#008a48] px-3.5 py-2 text-[9px] font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#00753d] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#008a48]/20 active:translate-y-0 active:scale-[0.98] sm:px-4 sm:py-2.5 sm:text-[10px] md:px-5 md:py-2.5 md:text-xs lg:text-sm"
+                  className="inline-flex items-center cursor-pointer justify-center rounded-lg bg-[#008a48] px-3.5 py-2 text-[9px] font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#00753d] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#008a48]/20 active:translate-y-0 active:scale-[0.98] sm:px-4 sm:py-2.5 sm:text-[10px] md:px-5 md:py-2.5 md:text-xs lg:text-sm"
                 >
                   সব পণ্য দেখুন
                 </button>
