@@ -84,6 +84,10 @@ function ProductImage({
 }) {
   const [imageError, setImageError] = useState(false);
 
+  useEffect(() => {
+    setImageError(false);
+  }, [image]);
+
   const showImage = isImageUrl(image) && !imageError;
 
   return (
@@ -98,7 +102,7 @@ function ProductImage({
         />
       ) : (
         <span className="text-2xl" role="img" aria-label={name}>
-          {categoryIcon || "🛒"}
+          {image || categoryIcon || "🛒"}
         </span>
       )}
     </div>
@@ -303,9 +307,20 @@ export default function BazarCompare() {
                   <span className="min-w-0 flex-1 truncate">
                     {selectedProduct ? (
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className="shrink-0">
-                          {selectedProduct.categoryIcon || "🛒"}
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden">
+                          {isImageUrl(selectedProduct.image) ? (
+                            <img
+                              src={selectedProduct.image}
+                              alt={selectedProduct.nameBn}
+                              className="h-full w-full object-contain"
+                            />
+                          ) : (
+                            selectedProduct.image ||
+                            selectedProduct.categoryIcon ||
+                            "🛒"
+                          )}
                         </span>
+
                         <span className="truncate">
                           {selectedProduct.nameBn}
                         </span>
@@ -374,6 +389,27 @@ export default function BazarCompare() {
                                       : "text-gray-700 hover:bg-gray-50"
                                   }`}
                                 >
+                                  <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-white">
+                                    {isImageUrl(product.image) ? (
+                                      <img
+                                        src={product.image}
+                                        alt={product.nameBn}
+                                        loading="lazy"
+                                        className="h-full w-full object-contain p-1"
+                                      />
+                                    ) : (
+                                      <span
+                                        className="text-xl"
+                                        role="img"
+                                        aria-label={product.nameBn}
+                                      >
+                                        {product.image ||
+                                          product.categoryIcon ||
+                                          "🛒"}
+                                      </span>
+                                    )}
+                                  </span>
+
                                   <span className="min-w-0 flex-1 truncate">
                                     {product.nameBn}
                                   </span>
