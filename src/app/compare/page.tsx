@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Market {
   market: string;
@@ -46,23 +46,19 @@ const getAverage = (min: number, max: number) => {
 };
 
 const getUnitText = (unit: string) => {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "kg":
       return "কেজি";
-
     case "litre":
     case "liter":
       return "লিটার";
-
     case "doz":
     case "dozen":
       return "ডজন";
-
     case "piece":
       return "পিস";
-
     default:
-      return unit;
+      return unit || "একক";
   }
 };
 
@@ -72,38 +68,24 @@ export default function BazarCompare() {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
     setMounted(true);
+
+    const controller = new AbortController();
 
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const response = await fetch(PRODUCTS_API);
+        const response = await fetch(PRODUCTS_API, {
+          signal: controller.signal,
+        });
 
         if (!response.ok) {
           throw new Error("Products fetch failed");
@@ -117,21 +99,48 @@ export default function BazarCompare() {
           setSelectedProductId(String(data[0].id));
         }
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+
         console.error("Products fetch error:", err);
-        setError("পণ্যের তথ্য লোড করা যায়নি।");
+        setError("পণ্যের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const selectedProduct = products.find(
     (product) => String(product.id) === selectedProductId,
   );
 
-  const markets = selectedProduct?.markets || [];
+  const markets = selectedProduct?.markets ?? [];
 
   const allMinimumPrices = markets.map((market) => market.min);
   const allMaximumPrices = markets.map((market) => market.max);
@@ -143,18 +152,16 @@ export default function BazarCompare() {
     allMaximumPrices.length > 0 ? Math.max(...allMaximumPrices) : 0;
 
   const averagePrice =
-    lowestPrice && highestPrice ? getAverage(lowestPrice, highestPrice) : 0;
+    markets.length > 0 ? getAverage(lowestPrice, highestPrice) : 0;
 
   const groupedProducts = products.reduce(
     (acc, product) => {
       const categoryName =
         product.categoryNameBn || product.category || "অন্যান্য";
 
-      const categoryIcon = product.categoryIcon || "🛒";
-
       if (!acc[categoryName]) {
         acc[categoryName] = {
-          icon: categoryIcon,
+          icon: product.categoryIcon || "🛒",
           items: [],
         };
       }
@@ -163,33 +170,35 @@ export default function BazarCompare() {
 
       return acc;
     },
-    {} as Record<
-      string,
-      {
-        icon: string;
-        items: Product[];
-      }
-    >,
+    {} as Record<string, { icon: string; items: Product[] }>,
   );
+
+  const filteredGroups = Object.entries(groupedProducts)
+    .map(([categoryName, group]) => ({
+      categoryName,
+      ...group,
+      items: group.items.filter((product) =>
+        product.nameBn.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#f4f6f4] px-3 py-4 text-gray-800 sm:px-4 sm:py-6 md:px-6 md:py-8">
-        <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6">
+      <div className="min-h-screen bg-[#f4f6f4] px-3 py-5 text-gray-800 sm:px-5 sm:py-7 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-5xl space-y-5">
           <div>
             <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
               বাজার তুলনা
             </h1>
-
             <p className="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">
               একটি পণ্য বেছে নিয়ে বিভাগভিত্তিক দাম পাশাপাশি দেখুন।
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-            <div className="h-4 w-28 animate-pulse rounded bg-gray-200 sm:w-32" />
-
-            <div className="mt-3 h-10 w-full animate-pulse rounded-lg bg-gray-100" />
+          <div className="animate-pulse rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+            <div className="h-4 w-32 rounded bg-gray-200" />
+            <div className="mt-3 h-11 rounded-lg bg-gray-100" />
           </div>
         </div>
       </div>
@@ -197,43 +206,54 @@ export default function BazarCompare() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f6f4] px-3 py-4 text-gray-800 sm:px-4 sm:py-6 md:px-6 md:py-8">
-      <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6">
+    <div className="min-h-screen overflow-x-clip bg-[#f4f6f4] px-3 py-5 text-gray-800 sm:px-5 sm:py-7 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-5xl space-y-5 sm:space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl">
             বাজার তুলনা
           </h1>
 
           <p className="mt-1 max-w-2xl text-xs leading-5 text-gray-500 sm:text-sm sm:leading-6">
-            একটি পণ্য বেছে নিয়ে বিভাগভিত্তিক দাম পাশাপাশি দেখুন।
+            একটি পণ্য বেছে নিয়ে বিভিন্ন বাজারের দাম পাশাপাশি দেখুন।
           </p>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-3 text-xs text-red-600 sm:px-4 sm:py-4 sm:text-sm">
+          <div
+            role="alert"
+            className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
+          >
             {error}
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="ml-2 font-semibold underline underline-offset-2"
+            >
+              আবার চেষ্টা করুন
+            </button>
           </div>
         )}
 
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm sm:p-5">
           <label className="mb-2 block text-xs font-semibold text-gray-600 sm:text-sm">
             পণ্য নির্বাচন করুন
           </label>
 
           {loading ? (
             <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100 sm:flex-1" />
-
-              <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100 sm:w-32" />
+              <div className="h-11 w-full animate-pulse rounded-lg bg-gray-100 sm:flex-1" />
+              <div className="h-11 w-full animate-pulse rounded-lg bg-gray-100 sm:w-36" />
             </div>
           ) : (
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="relative w-full min-w-0 flex-1" ref={dropdownRef}>
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
+              <div ref={dropdownRef} className="relative w-full min-w-0 flex-1">
                 <button
                   type="button"
-                  onClick={() => setIsOpen(!isOpen)}
+                  aria-expanded={isOpen}
+                  aria-haspopup="listbox"
+                  onClick={() => setIsOpen((previous) => !previous)}
                   disabled={products.length === 0}
-                  className="flex min-h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-left text-xs text-gray-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+                  className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-left text-sm outline-none transition hover:border-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="min-w-0 flex-1 truncate">
                     {selectedProduct ? (
@@ -241,7 +261,6 @@ export default function BazarCompare() {
                         <span className="shrink-0">
                           {selectedProduct.categoryIcon || "🛒"}
                         </span>
-
                         <span className="truncate">
                           {selectedProduct.nameBn}
                         </span>
@@ -251,76 +270,80 @@ export default function BazarCompare() {
                     )}
                   </span>
 
-                  <span className="ml-1 shrink-0 text-[10px] text-gray-400 sm:text-xs">
+                  <span
+                    className={`shrink-0 text-xs text-gray-400 transition-transform ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  >
                     ▼
                   </span>
                 </button>
 
                 {isOpen && (
-                  <div className="absolute left-0 right-0 z-50 mt-1 max-h-[70vh] overflow-y-auto rounded-lg border border-gray-200 bg-white p-2 shadow-xl sm:max-h-80">
-                    {/* Search */}
+                  <div className="absolute inset-x-0 top-full z-50 mt-1 max-h-[65vh] overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white p-2 shadow-xl sm:max-h-96">
                     <input
-                      type="text"
-                      placeholder="পণ্য খুঁজুন..."
+                      type="search"
+                      placeholder="পণ্যের নাম লিখে খুঁজুন..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(event) => setSearchQuery(event.target.value)}
                       autoFocus
-                      className="mb-2 h-9 w-full rounded-md border border-gray-200 px-3 text-xs text-gray-700 outline-none placeholder:text-gray-400 focus:border-emerald-500 sm:h-10 sm:text-sm"
+                      className="sticky top-0 mb-2 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none placeholder:text-gray-400 focus:border-emerald-500"
                     />
 
-                    {Object.keys(groupedProducts).length === 0 ? (
-                      <div className="p-3 text-center text-xs text-gray-500 sm:text-sm">
-                        কোনো পণ্য পাওয়া যায়নি
+                    {filteredGroups.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-gray-500">
+                        কোনো পণ্য পাওয়া যায়নি।
                       </div>
                     ) : (
-                      Object.entries(groupedProducts).map(
-                        ([categoryName, group]) => {
-                          const filteredItems = group.items.filter((item) =>
-                            item.nameBn
-                              .toLowerCase()
-                              .includes(searchQuery.toLowerCase()),
-                          );
+                      filteredGroups.map((group) => (
+                        <div
+                          key={group.categoryName}
+                          className="mb-2 last:mb-0"
+                        >
+                          <div className="flex items-center gap-2 px-2 py-2 text-xs font-bold text-gray-500 sm:text-sm">
+                            <span>{group.icon}</span>
+                            <span className="truncate">
+                              {group.categoryName}
+                            </span>
+                          </div>
 
-                          if (filteredItems.length === 0) {
-                            return null;
-                          }
+                          <div className="space-y-0.5">
+                            {group.items.map((product) => {
+                              const isSelected =
+                                String(product.id) === selectedProductId;
 
-                          return (
-                            <div key={categoryName} className="mb-2 last:mb-0">
-                              <div className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-gray-500 sm:text-xs">
-                                <span>{group.icon}</span>
+                              return (
+                                <button
+                                  key={product.id}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={isSelected}
+                                  onClick={() => {
+                                    setSelectedProductId(String(product.id));
+                                    setIsOpen(false);
+                                    setSearchQuery("");
+                                  }}
+                                  className={`flex min-h-10 w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
+                                    isSelected
+                                      ? "bg-emerald-50 font-semibold text-emerald-800"
+                                      : "text-gray-700 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {product.nameBn}
+                                  </span>
 
-                                <span className="truncate">{categoryName}</span>
-                              </div>
-
-                              {/* Products */}
-                              <div className="pl-1 sm:pl-2">
-                                {filteredItems.map((product) => (
-                                  <button
-                                    key={product.id}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedProductId(String(product.id));
-
-                                      setIsOpen(false);
-                                      setSearchQuery("");
-                                    }}
-                                    className={`flex min-h-9 w-full items-center rounded-md px-2.5 py-2 text-left text-xs transition hover:bg-emerald-50 sm:text-sm ${
-                                      String(product.id) === selectedProductId
-                                        ? "bg-emerald-100 font-semibold text-emerald-900"
-                                        : "text-gray-700"
-                                    }`}
-                                  >
-                                    <span className="truncate">
-                                      {product.nameBn}
+                                  {isSelected && (
+                                    <span className="shrink-0 text-emerald-600">
+                                      ✓
                                     </span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        },
-                      )
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))
                     )}
                   </div>
                 )}
@@ -329,235 +352,280 @@ export default function BazarCompare() {
               {selectedProduct?.slug ? (
                 <Link
                   href={`/products/${selectedProduct.slug}`}
-                  className="inline-flex min-h-10 w-full shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.98] sm:w-auto sm:px-5 sm:text-sm"
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 active:scale-[0.99] sm:w-auto sm:px-5"
                 >
                   বিস্তারিত দেখুন
+                  <span className="ml-2" aria-hidden="true">
+                    →
+                  </span>
                 </Link>
               ) : (
                 <button
                   type="button"
                   disabled
-                  className="min-h-10 w-full shrink-0 rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-xs font-medium text-gray-400 sm:w-auto sm:px-5 sm:text-sm"
+                  className="min-h-11 w-full shrink-0 rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-400 sm:w-auto sm:px-5"
                 >
                   বিস্তারিত দেখুন
                 </button>
               )}
             </div>
           )}
-        </div>
+        </section>
 
         {loading ? (
-          <div className="space-y-5 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:space-y-6 sm:p-5 md:p-6">
+          <section className="space-y-5 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-gray-200 sm:h-11 sm:w-11" />
-
+              <div className="h-12 w-12 shrink-0 animate-pulse rounded-full bg-gray-200" />
               <div className="min-w-0 flex-1">
-                <div className="h-5 w-40 animate-pulse rounded bg-gray-200 sm:h-6 sm:w-52" />
-
-                <div className="mt-2 h-3 w-56 animate-pulse rounded bg-gray-100 sm:w-64" />
+                <div className="h-5 w-36 max-w-full animate-pulse rounded bg-gray-200 sm:w-48" />
+                <div className="mt-2 h-3 w-48 max-w-full animate-pulse rounded bg-gray-100" />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="rounded-lg bg-gray-50 p-3 sm:p-3.5">
-                  <div className="h-3 w-14 animate-pulse rounded bg-gray-200" />
-
-                  <div className="mt-3 h-6 w-16 animate-pulse rounded bg-gray-200 sm:h-7" />
+                <div key={index} className="rounded-xl bg-gray-50 p-3.5 sm:p-4">
+                  <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
+                  <div className="mt-3 h-7 w-20 max-w-full animate-pulse rounded bg-gray-200" />
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         ) : selectedProduct ? (
-          <div className="space-y-5 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:space-y-6 sm:p-5 md:p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-lg sm:h-11 sm:w-11 sm:text-xl">
-                {selectedProduct.categoryIcon || selectedProduct.image || "🛒"}
+          <section className="space-y-5 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm sm:space-y-6 sm:p-5 lg:p-6">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 sm:h-16 sm:w-16">
+                {selectedProduct.image ? (
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.nameBn}
+                    loading="lazy"
+                    className="h-full w-full object-contain p-1"
+                  />
+                ) : (
+                  <span className="text-2xl">
+                    {selectedProduct.categoryIcon || "🛒"}
+                  </span>
+                )}
               </div>
 
               <div className="min-w-0 flex-1">
-                <h2 className="truncate text-base font-bold text-gray-800 sm:text-lg">
+                <h2 className="break-words text-base font-bold text-gray-800 sm:text-lg lg:text-xl">
                   {selectedProduct.nameBn}
                 </h2>
 
-                <p className="mt-0.5 text-[11px] leading-5 text-gray-500 sm:text-xs">
-                  প্রতি {getUnitText(selectedProduct.unit)}-এ আজকের দাম{" "}
-                  <span className="font-semibold text-gray-700">
-                    {toBengaliNumber(selectedProduct.today)} টাকা
-                  </span>
+                <p className="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">
+                  প্রতি {getUnitText(selectedProduct.unit)}-এর আজকের দাম
+                </p>
+
+                <p className="mt-0.5 text-sm font-semibold text-emerald-700 sm:text-base">
+                  {toBengaliNumber(selectedProduct.today)} টাকা
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4">
-              <div className="rounded-lg bg-gray-50 p-3 sm:p-3.5">
-                <span className="mb-1 block text-[11px] text-gray-500 sm:text-xs">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+              <div className="min-w-0 rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 sm:p-4">
+                <span className="block text-xs text-gray-500 sm:text-sm">
                   সর্বনিম্ন
                 </span>
 
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-extrabold text-emerald-600 sm:text-xl">
+                <div className="mt-2 flex flex-wrap items-baseline gap-1">
+                  <span className="break-words text-xl font-extrabold text-emerald-600 sm:text-2xl">
                     {toBengaliNumber(lowestPrice)}
                   </span>
-
-                  <span className="text-[10px] text-gray-500 sm:text-xs">
-                    টাকা
-                  </span>
+                  <span className="text-xs text-gray-500">টাকা</span>
                 </div>
               </div>
 
-              <div className="rounded-lg bg-gray-50 p-3 sm:p-3.5">
-                <span className="mb-1 block text-[11px] text-gray-500 sm:text-xs">
+              <div className="min-w-0 rounded-xl border border-rose-100 bg-rose-50/60 p-3 sm:p-4">
+                <span className="block text-xs text-gray-500 sm:text-sm">
                   সর্বাধিক
                 </span>
 
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-extrabold text-rose-500 sm:text-xl">
+                <div className="mt-2 flex flex-wrap items-baseline gap-1">
+                  <span className="break-words text-xl font-extrabold text-rose-500 sm:text-2xl">
                     {toBengaliNumber(highestPrice)}
                   </span>
-
-                  <span className="text-[10px] text-gray-500 sm:text-xs">
-                    টাকা
-                  </span>
+                  <span className="text-xs text-gray-500">টাকা</span>
                 </div>
               </div>
 
-              <div className="rounded-lg bg-gray-50 p-3 sm:p-3.5">
-                <span className="mb-1 block text-[11px] text-gray-500 sm:text-xs">
-                  গড়
+              <div className="min-w-0 rounded-xl border border-blue-100 bg-blue-50/60 p-3 sm:p-4">
+                <span className="block text-xs text-gray-500 sm:text-sm">
+                  গড় দাম
                 </span>
 
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-extrabold text-emerald-600 sm:text-xl">
+                <div className="mt-2 flex flex-wrap items-baseline gap-1">
+                  <span className="break-words text-xl font-extrabold text-blue-600 sm:text-2xl">
                     {toBengaliNumber(averagePrice)}
                   </span>
-
-                  <span className="text-[10px] text-gray-500 sm:text-xs">
-                    টাকা
-                  </span>
+                  <span className="text-xs text-gray-500">টাকা</span>
                 </div>
               </div>
 
-              <div className="rounded-lg bg-gray-50 p-3 sm:p-3.5">
-                <span className="mb-1 block text-[11px] text-gray-500 sm:text-xs">
+              <div className="min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-3 sm:p-4">
+                <span className="block text-xs text-gray-500 sm:text-sm">
                   বাজার সংখ্যা
                 </span>
 
-                <span className="text-lg font-extrabold text-gray-800 sm:text-xl">
+                <div className="mt-2 text-xl font-extrabold text-gray-800 sm:text-2xl">
                   {toBengaliNumber(markets.length)}
-                </span>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
         ) : null}
 
         {loading ? (
-          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="border-b border-gray-100 px-4 py-4 sm:px-5 sm:py-5">
-              <div className="h-4 w-32 animate-pulse rounded bg-gray-200 sm:h-5 sm:w-40" />
+          <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="border-b border-gray-100 px-4 py-4 sm:px-5">
+              <div className="h-5 w-36 animate-pulse rounded bg-gray-200" />
             </div>
 
-            <div className="overflow-x-auto">
-              <div className="min-w-[600px] p-3 sm:min-w-[650px] sm:p-5">
-                <div className="grid grid-cols-5 gap-4 border-b border-gray-100 bg-gray-50 px-3 py-3 sm:px-5">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="h-3 animate-pulse rounded bg-gray-200"
-                    />
-                  ))}
-                </div>
-
-                {Array.from({ length: 6 }).map((_, rowIndex) => (
-                  <div
-                    key={rowIndex}
-                    className="grid grid-cols-5 gap-4 border-b border-gray-100 px-3 py-4 sm:px-5"
-                  >
-                    {Array.from({ length: 5 }).map((_, cellIndex) => (
-                      <div
-                        key={cellIndex}
-                        className="h-3 animate-pulse rounded bg-gray-100"
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-3 p-4 sm:p-5">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-16 animate-pulse rounded-lg bg-gray-50"
+                />
+              ))}
             </div>
-          </div>
+          </section>
         ) : selectedProduct ? (
-          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="border-b border-gray-100 px-4 py-4 sm:px-5 sm:py-5">
-              <h3 className="text-sm font-bold text-gray-800 sm:text-base">
-                বাজারভিত্তিক দাম
-              </h3>
+          <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-5 sm:py-5">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-gray-800 sm:text-base">
+                  বাজারভিত্তিক দাম
+                </h3>
+                <p className="mt-1 text-xs text-gray-500">
+                  {toBengaliNumber(markets.length)}টি বাজারের তথ্য
+                </p>
+              </div>
+
+              <span className="shrink-0 rounded-lg bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-600">
+                {getUnitText(selectedProduct.unit)} অনুযায়ী
+              </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px] text-left text-xs text-gray-700 sm:min-w-[650px] sm:text-sm">
-                <thead className="border-b border-gray-100 bg-gray-50 text-[11px] font-semibold text-gray-500 sm:text-xs">
-                  <tr>
-                    <th className="whitespace-nowrap px-3 py-3 sm:px-5">
-                      বাজার
-                    </th>
-
-                    <th className="whitespace-nowrap px-3 py-3 sm:px-5">
-                      বিভাগ
-                    </th>
-
-                    <th className="whitespace-nowrap px-3 py-3 sm:px-5">
-                      সর্বনিম্ন
-                    </th>
-
-                    <th className="whitespace-nowrap px-3 py-3 sm:px-5">
-                      সর্বাধিক
-                    </th>
-
-                    <th className="whitespace-nowrap px-3 py-3 text-right sm:px-5">
-                      গড়
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-gray-100">
+            {markets.length === 0 ? (
+              <div className="px-4 py-10 text-center text-sm text-gray-500 sm:py-12">
+                এই পণ্যের বাজারভিত্তিক দাম পাওয়া যায়নি।
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3 p-3 sm:p-4 lg:hidden">
                   {markets.map((market, index) => {
                     const average = getAverage(market.min, market.max);
 
                     return (
-                      <tr
-                        key={`${market.market}-${index}`}
-                        className="transition-colors hover:bg-gray-50/60"
+                      <article
+                        key={`${market.market}-${market.division}-${index}`}
+                        className="rounded-xl border border-gray-100 bg-white p-3.5 transition hover:border-gray-200 sm:p-4"
                       >
-                        <td className="max-w-[150px] truncate px-3 py-3 font-medium text-gray-800 sm:max-w-none sm:px-5">
-                          {market.market}
-                        </td>
+                        <div className="flex min-w-0 items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="break-words text-sm font-semibold text-gray-800 sm:text-base">
+                              {market.market}
+                            </h4>
 
-                        <td className="whitespace-nowrap px-3 py-3 text-gray-500 sm:px-5">
-                          {market.division}
-                        </td>
+                            <p className="mt-1 text-xs text-gray-500">
+                              {market.division}
+                            </p>
+                          </div>
 
-                        <td className="whitespace-nowrap px-3 py-3 text-gray-700 sm:px-5">
-                          {toBengaliNumber(market.min)} টাকা
-                        </td>
+                          <span className="shrink-0 rounded-lg bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                            গড় {toBengaliNumber(average)} ৳
+                          </span>
+                        </div>
 
-                        <td className="whitespace-nowrap px-3 py-3 text-gray-700 sm:px-5">
-                          {toBengaliNumber(market.max)} টাকা
-                        </td>
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div className="min-w-0 rounded-lg bg-emerald-50/70 p-3">
+                            <p className="text-xs text-gray-500">
+                              সর্বনিম্ন দাম
+                            </p>
+                            <p className="mt-1 break-words text-base font-bold text-emerald-700 sm:text-lg">
+                              {toBengaliNumber(market.min)}{" "}
+                              <span className="text-xs font-medium">টাকা</span>
+                            </p>
+                          </div>
 
-                        <td className="whitespace-nowrap px-3 py-3 text-right font-medium text-gray-800 sm:px-5">
-                          {toBengaliNumber(average)} টাকা
-                        </td>
-                      </tr>
+                          <div className="min-w-0 rounded-lg bg-rose-50/70 p-3">
+                            <p className="text-xs text-gray-500">
+                              সর্বাধিক দাম
+                            </p>
+                            <p className="mt-1 break-words text-base font-bold text-rose-600 sm:text-lg">
+                              {toBengaliNumber(market.max)}{" "}
+                              <span className="text-xs font-medium">টাকা</span>
+                            </p>
+                          </div>
+                        </div>
+                      </article>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </div>
+
+                <div className="hidden overflow-x-auto lg:block">
+                  <table className="w-full text-left text-sm text-gray-700">
+                    <thead className="border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-500">
+                      <tr>
+                        <th className="whitespace-nowrap px-5 py-4">বাজার</th>
+                        <th className="whitespace-nowrap px-5 py-4">বিভাগ</th>
+                        <th className="whitespace-nowrap px-5 py-4">
+                          সর্বনিম্ন
+                        </th>
+                        <th className="whitespace-nowrap px-5 py-4">
+                          সর্বাধিক
+                        </th>
+                        <th className="whitespace-nowrap px-5 py-4 text-right">
+                          গড়
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-gray-100">
+                      {markets.map((market, index) => {
+                        const average = getAverage(market.min, market.max);
+
+                        return (
+                          <tr
+                            key={`${market.market}-${market.division}-${index}`}
+                            className="transition-colors hover:bg-gray-50/70"
+                          >
+                            <td className="max-w-xs break-words px-5 py-4 font-medium text-gray-800">
+                              {market.market}
+                            </td>
+
+                            <td className="px-5 py-4 text-gray-500">
+                              {market.division}
+                            </td>
+
+                            <td className="whitespace-nowrap px-5 py-4 font-medium text-emerald-700">
+                              {toBengaliNumber(market.min)} টাকা
+                            </td>
+
+                            <td className="whitespace-nowrap px-5 py-4 font-medium text-rose-600">
+                              {toBengaliNumber(market.max)} টাকা
+                            </td>
+
+                            <td className="whitespace-nowrap px-5 py-4 text-right font-semibold text-gray-800">
+                              {toBengaliNumber(average)} টাকা
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </section>
         ) : null}
 
-        {!loading && !selectedProduct && (
+        {!loading && !selectedProduct && !error && (
           <div className="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm sm:p-8">
-            <p className="text-xs text-gray-500 sm:text-sm">
+            <p className="text-sm text-gray-500">
               কোনো পণ্যের তথ্য পাওয়া যায়নি।
             </p>
           </div>
