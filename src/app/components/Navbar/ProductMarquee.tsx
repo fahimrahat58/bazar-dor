@@ -24,7 +24,7 @@ export default function ProductMarquee() {
     async function fetchProducts() {
       try {
         const response = await fetch(
-          "https://api.api-store.workers.dev/api/bazardor/products",
+          "https://openapi.programming-hero.com/api/bazardor/products",
           {
             signal: controller.signal,
           },
@@ -74,11 +74,7 @@ export default function ProductMarquee() {
                 className="h-3 animate-pulse rounded bg-slate-200 sm:h-3.5"
                 style={{
                   width: `${
-                    index % 3 === 0
-                      ? 72
-                      : index % 2 === 0
-                        ? 88
-                        : 64
+                    index % 3 === 0 ? 72 : index % 2 === 0 ? 88 : 64
                   }px`,
                 }}
               />
@@ -114,9 +110,7 @@ export default function ProductMarquee() {
             {item.image || "🛒"}
           </span>
 
-          <span className="font-semibold text-slate-900">
-            {item.nameBn}
-          </span>
+          <span className="font-semibold text-slate-900">{item.nameBn}</span>
 
           <span className="text-slate-600">
             ৳{item.today}/{item.unit}
@@ -125,11 +119,7 @@ export default function ProductMarquee() {
           {item.change && item.change.dir !== "flat" && (
             <span
               className={`font-bold ${
-                isUp
-                  ? "text-red-600"
-                  : isDown
-                    ? "text-green-600"
-                    : ""
+                isUp ? "text-red-600" : isDown ? "text-green-600" : ""
               }`}
             >
               {isUp ? "▲" : "▼"} {pct}%
@@ -146,10 +136,7 @@ export default function ProductMarquee() {
           {renderProducts(products)}
         </div>
 
-        <div
-          className="flex w-max shrink-0 flex-nowrap"
-          aria-hidden="true"
-        >
+        <div className="flex w-max shrink-0 flex-nowrap" aria-hidden="true">
           {renderProducts(products, true)}
         </div>
       </div>

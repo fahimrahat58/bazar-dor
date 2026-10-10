@@ -113,7 +113,7 @@ export default function AllProducts() {
         setLoading(true);
 
         const res = await fetch(
-          "https://api.api-store.workers.dev/api/bazardor/products",
+          "https://openapi.programming-hero.com/api/bazardor/products",
           {
             signal: controller.signal,
           },

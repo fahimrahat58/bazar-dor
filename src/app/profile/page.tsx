@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogOut, UserRound, Mail, Pencil, LoaderCircle } from "lucide-react";
+import { LogOut, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { signOut, useSession } from "@/app/lib/auth-client";
@@ -46,127 +46,135 @@ export default function ProfilePage() {
     }
   };
 
-  if (isPending || !user) {
+  if (isPending) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-          <LoaderCircle className="animate-spin" size={20} />
-          প্রোফাইল লোড হচ্ছে...
+      <main className="min-h-screen bg-[#f4f7f4] px-3 py-6 sm:px-5 sm:py-8 md:px-6 md:py-10 lg:px-8 lg:py-12">
+        <div className="mx-auto w-full max-w-3xl animate-pulse">
+          <div className="mb-5 space-y-3 sm:mb-8">
+            <div className="h-8 w-48 rounded-lg bg-gray-200 sm:h-9 sm:w-56" />
+            <div className="h-4 w-full max-w-sm rounded bg-gray-200" />
+          </div>
+
+          <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 md:p-8">
+            <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:pb-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                <div className="h-14 w-14 shrink-0 rounded-full bg-gray-200 sm:h-16 sm:w-16" />
+
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-5 w-32 max-w-full rounded bg-gray-200" />
+                  <div className="h-4 w-40 max-w-full rounded bg-gray-200" />
+                </div>
+              </div>
+
+              <div className="h-11 w-full rounded-xl bg-gray-200 md:h-10 md:w-32" />
+            </div>
+
+            <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
+              <div className="h-5 w-16 rounded bg-gray-200" />
+
+              <div className="space-y-2">
+                <div className="h-4 w-10 rounded bg-gray-200" />
+                <div className="h-11 w-full rounded-xl bg-gray-100 sm:h-12" />
+              </div>
+
+              <div className="h-11 w-full rounded-xl bg-gray-200 sm:h-12" />
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
     );
   }
 
-  return (
-    <main className="min-h-screen bg-[#f4f7f4] px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-6 sm:mb-8">
-          <p className="text-sm font-semibold text-[#008a48]">
-            আমার অ্যাকাউন্ট
-          </p>
+  if (!user) {
+    return null;
+  }
 
-          <h1 className="mt-1 text-2xl font-black text-gray-900 sm:text-3xl">
+  return (
+    <main className="min-h-screen bg-[#f4f7f4] px-3 py-6 sm:px-5 sm:py-8 md:px-6 md:py-10 lg:px-8 lg:py-12">
+      <div className="mx-auto w-full max-w-3xl">
+        <div className="mb-5 sm:mb-6 md:mb-8">
+          <h1 className="text-2xl font-black text-gray-900 sm:text-3xl">
             আমার প্রোফাইল
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500">
-            আপনার অ্যাকাউন্টের তথ্য দেখুন এবং প্রয়োজনে আপডেট করুন।
+          <p className="mt-2 text-sm leading-6 text-gray-500 sm:text-base">
+            আপনার অ্যাকাউন্টের তথ্য দেখুন এবং আপডেট করুন।
           </p>
         </div>
 
-        <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm sm:rounded-3xl">
-          <div className="h-24 bg-gradient-to-r from-[#008a48] to-[#49b77c] sm:h-32" />
-
-          <div className="px-5 pb-6 sm:px-8 sm:pb-8">
-            <div className="-mt-12 flex flex-col gap-4 sm:-mt-14 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex min-w-0 items-end gap-4">
-                <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-[#e4f5eb] text-3xl font-bold text-[#008a48] shadow-sm sm:h-28 sm:w-28 sm:rounded-3xl">
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={user.name || "Profile"}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    user.name?.charAt(0).toUpperCase() || "U"
-                  )}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => router.push("/update-profile")}
-                className="inline-flex w-full items-center cursor-pointer justify-center gap-2 rounded-xl bg-[#008a48] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#00783e] active:scale-[0.98] sm:mb-1 sm:w-auto"
-              >
-                <Pencil size={16} />
-                প্রোফাইল আপডেট
-              </button>
-            </div>
-
-            <div className="mt-5 border-b border-gray-100 pb-5">
-              <h2 className="break-words text-xl font-black text-gray-900 sm:text-2xl">
-                {user.name || "নাম দেওয়া হয়নি"}
-              </h2>
-
-              <p className="mt-1 break-all text-sm text-gray-500">
-                {user.email}
-              </p>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <h3 className="text-base font-bold text-gray-900">
-                অ্যাকাউন্টের তথ্য
-              </h3>
-
-              <div className="flex min-w-0 items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#008a48] shadow-sm">
-                  <UserRound size={20} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-gray-500">
-                    সম্পূর্ণ নাম
-                  </p>
-                  <p className="mt-1 break-words text-sm font-bold text-gray-900">
-                    {user.name || "নাম দেওয়া হয়নি"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex min-w-0 items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#008a48] shadow-sm">
-                  <Mail size={20} />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-gray-500">
-                    ইমেইল ঠিকানা
-                  </p>
-                  <p className="mt-1 break-all text-sm font-bold text-gray-900">
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 border-t border-gray-100 pt-5">
-              <button
-                type="button"
-                onClick={handleSignOut}
-                disabled={signOutLoading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              >
-                {signOutLoading ? (
-                  <LoaderCircle size={17} className="animate-spin" />
+        <section className="w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 md:p-8">
+          <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:pb-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-xl font-bold text-[#008a48] sm:h-16 sm:w-16">
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt={user.name || "Profile"}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
                 ) : (
-                  <LogOut size={17} />
+                  user.name?.charAt(0).toUpperCase() || "U"
                 )}
-                {signOutLoading ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}
-              </button>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate text-base font-bold text-gray-900 sm:text-lg">
+                  {user.name || "নাম দেওয়া হয়নি"}
+                </h2>
+
+                <p className="break-all text-xs text-gray-500 sm:truncate sm:text-sm">
+                  {user.email}
+                </p>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signOutLoading}
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 md:min-h-10 md:w-auto"
+            >
+              {signOutLoading ? (
+                <LoaderCircle size={16} className="animate-spin" />
+              ) : (
+                <LogOut size={16} />
+              )}
+
+              {signOutLoading ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}
+            </button>
+          </div>
+
+          <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
+            <h3 className="text-base font-bold text-gray-900">তথ্য</h3>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="profile-name"
+                className="text-xs font-medium text-gray-500 sm:text-sm"
+              >
+                নাম
+              </label>
+
+              <input
+                id="profile-name"
+                type="text"
+                readOnly
+                value={user.name || ""}
+                placeholder="নাম দেওয়া হয়নি"
+                className="block w-full min-w-0 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-900 outline-none focus:border-[#008a48] sm:px-4"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push("/update-profile")}
+              className="mt-2 min-h-11 w-full cursor-pointer rounded-xl bg-[#008a48] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#00783e] active:scale-[0.98]"
+            >
+              আপডেট
+            </button>
           </div>
         </section>
       </div>

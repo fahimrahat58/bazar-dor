@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ChevronDown,
-  LogOut,
-  Menu,
-  ShoppingCart,
-  User,
-  X,
-} from "lucide-react";
+import { ChevronDown, LogOut, Menu, ShoppingCart, User, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -22,7 +15,7 @@ type Category = {
 };
 
 const CATEGORY_API =
-  "https://api.api-store.workers.dev/api/bazardor/categories";
+  "https://openapi.programming-hero.com/api/bazardor/categories";
 
 export default function NavbarContent() {
   const pathname = usePathname();
@@ -39,8 +32,7 @@ export default function NavbarContent() {
 
   const user = session?.user;
 
-  const getInitial = (name?: string) =>
-    name?.charAt(0).toUpperCase() || "U";
+  const getInitial = (name?: string) => name?.charAt(0).toUpperCase() || "U";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -151,9 +143,7 @@ export default function NavbarContent() {
       if (result.error) {
         toast.dismiss(toastId);
 
-        toast.error(
-          result.error.message || "সাইন আউট করতে সমস্যা হয়েছে",
-        );
+        toast.error(result.error.message || "সাইন আউট করতে সমস্যা হয়েছে");
 
         return;
       }
@@ -176,9 +166,7 @@ export default function NavbarContent() {
       toast.dismiss(toastId);
 
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "সাইন আউট করতে সমস্যা হয়েছে",
+        error instanceof Error ? error.message : "সাইন আউট করতে সমস্যা হয়েছে",
       );
     }
   }
@@ -186,8 +174,7 @@ export default function NavbarContent() {
   const getCategoryUrl = (slug: string) =>
     `/category/${encodeURIComponent(slug)}`;
 
-  const isCategoryActive = (slug: string) =>
-    pathname === getCategoryUrl(slug);
+  const isCategoryActive = (slug: string) => pathname === getCategoryUrl(slug);
 
   const categoryClass = (isActive: boolean) =>
     `group flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-bold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#008a48]/15 xl:px-3 xl:text-[13px] ${
@@ -237,9 +224,7 @@ export default function NavbarContent() {
               <div className="relative" ref={userDropdownRef}>
                 <button
                   type="button"
-                  onClick={() =>
-                    setUserDropdownOpen((previous) => !previous)
-                  }
+                  onClick={() => setUserDropdownOpen((previous) => !previous)}
                   aria-expanded={userDropdownOpen}
                   className="flex items-center gap-2 rounded-full px-2 py-1 transition-all duration-200 hover:bg-gray-50"
                 >
@@ -359,11 +344,7 @@ export default function NavbarContent() {
                   className="h-7 shrink-0 animate-pulse rounded-md bg-gray-100"
                   style={{
                     width: `${
-                      index % 3 === 0
-                        ? 72
-                        : index % 2 === 0
-                          ? 64
-                          : 80
+                      index % 3 === 0 ? 72 : index % 2 === 0 ? 64 : 80
                     }px`,
                   }}
                 />
@@ -377,9 +358,7 @@ export default function NavbarContent() {
                 <Link
                   key={category.id}
                   href={getCategoryUrl(category.slug)}
-                  className={categoryClass(
-                    isCategoryActive(category.slug),
-                  )}
+                  className={categoryClass(isCategoryActive(category.slug))}
                 >
                   <span className="text-sm leading-none transition-transform duration-200 group-hover:scale-105 xl:text-[15px]">
                     {category.icon}
@@ -409,11 +388,7 @@ export default function NavbarContent() {
                       className="h-3 rounded bg-gray-200"
                       style={{
                         width: `${
-                          index % 3 === 0
-                            ? 52
-                            : index % 2 === 0
-                              ? 44
-                              : 60
+                          index % 3 === 0 ? 52 : index % 2 === 0 ? 44 : 60
                         }px`,
                       }}
                     />
@@ -442,9 +417,7 @@ export default function NavbarContent() {
                         {category.icon}
                       </span>
 
-                      <span className="truncate">
-                        {category.nameBn}
-                      </span>
+                      <span className="truncate">{category.nameBn}</span>
                     </Link>
                   );
                 })

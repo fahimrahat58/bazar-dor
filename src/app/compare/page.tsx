@@ -30,7 +30,8 @@ interface Product {
   markets: Market[];
 }
 
-const PRODUCTS_API = "https://api.api-store.workers.dev/api/bazardor/products";
+const PRODUCTS_API =
+  "https://openapi.programming-hero.com/api/bazardor/products";
 
 const toBengaliNumber = (value: number | string) => {
   const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];

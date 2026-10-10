@@ -96,7 +96,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
       try {
         const response = await fetch(
-          `https://api.api-store.workers.dev/api/bazardor/products?category=${encodeURIComponent(
+          `https://openapi.programming-hero.com/api/bazardor/products?category=${encodeURIComponent(
             slug,
           )}`,
           {
@@ -170,7 +170,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   return (
     <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#f8f9fa] py-4 sm:py-6 md:py-7 lg:py-8">
       <div className="mx-auto w-full max-w-7xl min-w-0 px-3 sm:px-5 md:px-7 lg:px-10 xl:px-14">
-        {/* Category Header */}
         <div className="mb-4 w-full min-w-0 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:mb-5 sm:rounded-2xl sm:p-5 md:mb-6 md:p-6">
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3 md:gap-3.5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50 text-xl transition-all duration-300 hover:scale-105 hover:bg-green-100 sm:h-12 sm:w-12 sm:rounded-xl sm:text-2xl md:h-14 md:w-14 md:text-3xl">
