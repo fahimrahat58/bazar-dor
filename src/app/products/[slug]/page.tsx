@@ -74,7 +74,7 @@ export default function ProductDetailsPage({
         const slug = resolvedParams.slug;
 
         const allProductsRes = await fetch(
-          "https://openapi.programming-hero.com/api/bazardor/products",
+          `https://openapi.programming-hero.com/api/bazardor/products/${foundProduct.id}`,
           {
             signal: controller.signal,
           },
