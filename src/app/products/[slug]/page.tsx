@@ -30,12 +30,17 @@ interface Product {
   markets: Market[];
 }
 
+type ApiResponse =
+  | Product[]
+  | {
+      data?: Product[] | { products?: Product[] };
+      products?: Product[];
+    };
+
 const toBengaliNumber = (num: number | string): string => {
   const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
 
-  return num
-    .toString()
-    .replace(/\d/g, (digit) => bnDigits[parseInt(digit, 10)]);
+  return num.toString().replace(/\d/g, (digit) => bnDigits[Number(digit)]);
 };
 
 const getUnitText = (unit: string): string => {
@@ -55,6 +60,28 @@ const getUnitText = (unit: string): string => {
   }
 };
 
+function getProducts(payload: ApiResponse): Product[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  if (payload.data && !Array.isArray(payload.data)) {
+    if (Array.isArray(payload.data.products)) {
+      return payload.data.products;
+    }
+  }
+
+  if (Array.isArray(payload.products)) {
+    return payload.products;
+  }
+
+  return [];
+}
+
 export default function ProductDetailsPage({
   params,
 }: {
@@ -69,44 +96,47 @@ export default function ProductDetailsPage({
     const fetchProduct = async () => {
       try {
         setLoading(true);
+        setProduct(null);
 
-        const resolvedParams = await params;
-        const slug = resolvedParams.slug;
+        const { slug } = await params;
 
-        const allProductsRes = await fetch(
+        const response = await fetch(
           "https://openapi.programming-hero.com/api/bazardor/products",
           {
             signal: controller.signal,
           },
         );
 
-        if (!allProductsRes.ok) {
-          throw new Error("Failed to fetch products");
+        if (!response.ok) {
+          throw new Error(`Products API error: ${response.status}`);
         }
 
-        const allProducts: Product[] = await allProductsRes.json();
+        const payload: ApiResponse = await response.json();
+        const allProducts = getProducts(payload);
+
+        if (allProducts.length === 0) {
+          throw new Error("No products found in API response");
+        }
 
         const foundProduct = allProducts.find((item) => item.slug === slug);
 
         if (!foundProduct) {
-          throw new Error("Product not found");
+          throw new Error(`Product not found for slug: ${slug}`);
         }
-
-        const productRes = await fetch(
-          `https://api.api-store.workers.dev/api/bazardor/products/${foundProduct.id}`,
-          {
-            signal: controller.signal,
-          },
-        );
-
-        if (!productRes.ok) {
-          throw new Error("Failed to fetch product details");
-        }
-
-        const productData: Product = await productRes.json();
 
         if (!controller.signal.aborted) {
-          setProduct(productData);
+          setProduct({
+            ...foundProduct,
+            markets: foundProduct.markets ?? [],
+            change: foundProduct.change ?? {
+              dir: "flat",
+              pct: 0,
+            },
+            image: foundProduct.image ?? "",
+            categoryIcon: foundProduct.categoryIcon ?? "🛒",
+            categoryNameBn: foundProduct.categoryNameBn ?? "অন্যান্য",
+            unit: foundProduct.unit ?? "",
+          });
         }
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
@@ -181,36 +211,31 @@ export default function ProductDetailsPage({
     );
   }
 
+  const markets = product.markets;
+
   const minPrice =
-    product.markets.length > 0
-      ? Math.min(...product.markets.map((m) => m.min))
-      : 0;
+    markets.length > 0 ? Math.min(...markets.map((m) => m.min)) : 0;
 
   const maxPrice =
-    product.markets.length > 0
-      ? Math.max(...product.markets.map((m) => m.max))
-      : 0;
+    markets.length > 0 ? Math.max(...markets.map((m) => m.max)) : 0;
 
   const minPriceMarket =
-    product.markets.find((m) => m.min === minPrice)?.market ||
-    "সবচেয়ে কম দামের বাজার";
+    markets.find((m) => m.min === minPrice)?.market || "তথ্য পাওয়া যায়নি";
 
   const maxPriceMarket =
-    product.markets.find((m) => m.max === maxPrice)?.market ||
-    "সবচেয়ে বেশি দামের বাজার";
+    markets.find((m) => m.max === maxPrice)?.market || "তথ্য পাওয়া যায়নি";
 
   const totalAvg =
-    product.markets.length > 0
-      ? product.markets.reduce((acc, m) => acc + (m.min + m.max) / 2, 0) /
-        product.markets.length
+    markets.length > 0
+      ? markets.reduce((acc, m) => acc + (m.min + m.max) / 2, 0) /
+        markets.length
       : 0;
 
   const isUp = product.change.dir === "up";
   const isDown = product.change.dir === "down";
-  const isFlat = product.change.dir === "flat";
 
   const unitText = getUnitText(product.unit);
-  const productEmoji = product.image?.trim() || product.categoryIcon || "🥛";
+  const productEmoji = product.image?.trim() || product.categoryIcon || "🛒";
 
   const percentageColor = isUp
     ? "text-red-500"
@@ -221,7 +246,7 @@ export default function ProductDetailsPage({
   return (
     <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#f8f9fa] py-4 text-[#2C3E50] sm:py-6 md:py-7 lg:py-8">
       <div className="mx-auto w-full max-w-7xl min-w-0 px-3 sm:px-5 md:px-7 lg:px-10 xl:px-14">
-        <nav className="mb-4 flex items-center gap-1.5 text-xs text-gray-500 sm:text-sm">
+        <nav className="mb-4 flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-gray-500 sm:text-sm">
           <Link href="/" className="transition-colors hover:text-emerald-700">
             হোম
           </Link>
@@ -389,7 +414,7 @@ export default function ProductDetailsPage({
               </thead>
 
               <tbody className="divide-y divide-gray-100 text-[10px] text-gray-700 sm:text-xs md:text-sm">
-                {product.markets.map((m, idx) => {
+                {markets.map((m, idx) => {
                   const avg = ((m.min + m.max) / 2).toFixed(2);
 
                   return (
@@ -419,6 +444,17 @@ export default function ProductDetailsPage({
                     </tr>
                   );
                 })}
+
+                {markets.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-8 text-center text-sm text-gray-500"
+                    >
+                      বাজারভিত্তিক দামের তথ্য পাওয়া যায়নি।
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
