@@ -98,7 +98,7 @@ function ProductImage({
         />
       ) : (
         <span className="text-2xl" role="img" aria-label={name}>
-          {image || categoryIcon || "🛒"}
+          {categoryIcon || "🛒"}
         </span>
       )}
     </div>
@@ -136,6 +136,8 @@ export default function BazarCompare() {
 
         const data: Product[] = await response.json();
 
+        if (controller.signal.aborted) return;
+
         setProducts(data);
 
         if (data.length > 0) {
@@ -147,7 +149,10 @@ export default function BazarCompare() {
         }
 
         console.error("Products fetch error:", err);
-        setError("পণ্যের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।");
+
+        if (!controller.signal.aborted) {
+          setError("পণ্যের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।");
+        }
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -520,8 +525,8 @@ export default function BazarCompare() {
             </div>
           </section>
         ) : selectedProduct ? (
-          <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-5 sm:py-5">
+          <section className="min-w-0 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-3 py-4 sm:px-5 sm:py-5">
               <div className="min-w-0">
                 <h3 className="text-sm font-bold text-gray-800 sm:text-base">
                   বাজারভিত্তিক দাম
@@ -531,7 +536,7 @@ export default function BazarCompare() {
                 </p>
               </div>
 
-              <span className="shrink-0 rounded-lg bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-600">
+              <span className="shrink-0 rounded-lg bg-gray-50 px-2 py-1.5 text-[10px] font-medium text-gray-600 sm:px-2.5 sm:text-xs">
                 {getUnitText(selectedProduct.unit)} অনুযায়ী
               </span>
             </div>
@@ -541,106 +546,66 @@ export default function BazarCompare() {
                 এই পণ্যের বাজারভিত্তিক দাম পাওয়া যায়নি।
               </div>
             ) : (
-              <>
-                <div className="space-y-3 p-3 sm:p-4 lg:hidden">
-                  {markets.map((market, index) => {
-                    const average = getAverage(market.min, market.max);
+              <div className="w-full min-w-0 overflow-hidden">
+                <table className="w-full table-fixed text-left text-[10px] sm:text-xs md:text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-[#F7F9F7] text-[9px] font-semibold text-gray-600 sm:text-xs">
+                      <th className="w-[25%] break-words px-1.5 py-3 sm:px-3 md:px-5">
+                        বাজার
+                      </th>
 
-                    return (
-                      <article
-                        key={`${market.market}-${market.division}-${index}`}
-                        className="rounded-xl border border-gray-100 bg-white p-3.5 transition hover:border-gray-200 sm:p-4"
-                      >
-                        <div className="flex min-w-0 items-start justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <h4 className="break-words text-sm font-semibold text-gray-800 sm:text-base">
-                              {market.market}
-                            </h4>
-                            <p className="mt-1 text-xs text-gray-500">
-                              {market.division}
-                            </p>
-                          </div>
+                      <th className="w-[19%] break-words px-1 py-3 sm:px-3 md:px-5">
+                        বিভাগ
+                      </th>
 
-                          <span className="shrink-0 rounded-lg bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
-                            গড় {toBengaliNumber(average)} ৳
-                          </span>
-                        </div>
+                      <th className="w-[18%] break-words px-1 py-3 sm:px-3 md:px-5">
+                        সর্বনিম্ন
+                      </th>
 
-                        <div className="mt-4 grid grid-cols-2 gap-3">
-                          <div className="min-w-0 rounded-lg bg-emerald-50/70 p-3">
-                            <p className="text-xs text-gray-500">
-                              সর্বনিম্ন দাম
-                            </p>
-                            <p className="mt-1 break-words text-base font-bold text-emerald-700 sm:text-lg">
-                              {toBengaliNumber(market.min)}{" "}
-                              <span className="text-xs font-medium">টাকা</span>
-                            </p>
-                          </div>
+                      <th className="w-[19%] break-words px-1 py-3 sm:px-3 md:px-5">
+                        সর্বাধিক
+                      </th>
 
-                          <div className="min-w-0 rounded-lg bg-rose-50/70 p-3">
-                            <p className="text-xs text-gray-500">
-                              সর্বাধিক দাম
-                            </p>
-                            <p className="mt-1 break-words text-base font-bold text-rose-600 sm:text-lg">
-                              {toBengaliNumber(market.max)}{" "}
-                              <span className="text-xs font-medium">টাকা</span>
-                            </p>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
+                      <th className="w-[19%] break-words px-1 py-3 text-right sm:px-3 md:px-5">
+                        গড়
+                      </th>
+                    </tr>
+                  </thead>
 
-                <div className="hidden overflow-x-auto lg:block">
-                  <table className="w-full text-left text-sm text-gray-700">
-                    <thead className="border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-500">
-                      <tr>
-                        <th className="whitespace-nowrap px-5 py-4">বাজার</th>
-                        <th className="whitespace-nowrap px-5 py-4">বিভাগ</th>
-                        <th className="whitespace-nowrap px-5 py-4">
-                          সর্বনিম্ন
-                        </th>
-                        <th className="whitespace-nowrap px-5 py-4">
-                          সর্বাধিক
-                        </th>
-                        <th className="whitespace-nowrap px-5 py-4 text-right">
-                          গড়
-                        </th>
-                      </tr>
-                    </thead>
+                  <tbody className="divide-y divide-gray-100 text-[10px] text-gray-700 sm:text-xs md:text-sm">
+                    {markets.map((market, index) => {
+                      const average = getAverage(market.min, market.max);
 
-                    <tbody className="divide-y divide-gray-100">
-                      {markets.map((market, index) => {
-                        const average = getAverage(market.min, market.max);
+                      return (
+                        <tr
+                          key={`${market.market}-${market.division}-${index}`}
+                          className="odd:bg-[#FAFCFA] even:bg-white transition-colors hover:bg-emerald-50/40"
+                        >
+                          <td className="break-words px-1.5 py-3 font-medium leading-relaxed text-gray-900 sm:px-3 md:px-5">
+                            {market.market}
+                          </td>
 
-                        return (
-                          <tr
-                            key={`${market.market}-${market.division}-${index}`}
-                            className="transition-colors hover:bg-gray-50/70"
-                          >
-                            <td className="max-w-xs break-words px-5 py-4 font-medium text-gray-800">
-                              {market.market}
-                            </td>
-                            <td className="px-5 py-4 text-gray-500">
-                              {market.division}
-                            </td>
-                            <td className="whitespace-nowrap px-5 py-4 font-medium text-emerald-700">
-                              {toBengaliNumber(market.min)} টাকা
-                            </td>
-                            <td className="whitespace-nowrap px-5 py-4 font-medium text-rose-600">
-                              {toBengaliNumber(market.max)} টাকা
-                            </td>
-                            <td className="whitespace-nowrap px-5 py-4 text-right font-semibold text-gray-800">
-                              {toBengaliNumber(average)} টাকা
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                          <td className="break-words px-1 py-3 leading-relaxed text-gray-500 sm:px-3 md:px-5">
+                            {market.division}
+                          </td>
+
+                          <td className="break-words px-1 py-3 leading-relaxed sm:px-3 md:px-5">
+                            {toBengaliNumber(market.min)} টাকা
+                          </td>
+
+                          <td className="break-words px-1 py-3 leading-relaxed sm:px-3 md:px-5">
+                            {toBengaliNumber(market.max)} টাকা
+                          </td>
+
+                          <td className="break-words px-1 py-3 text-right font-bold leading-relaxed text-gray-900 sm:px-3 md:px-5">
+                            {toBengaliNumber(average)} টাকা
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </section>
         ) : null}
