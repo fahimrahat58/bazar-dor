@@ -62,6 +62,49 @@ const getUnitText = (unit: string) => {
   }
 };
 
+const isImageUrl = (image?: string) => {
+  if (!image) return false;
+
+  try {
+    const url = new URL(image);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
+function ProductImage({
+  image,
+  categoryIcon,
+  name,
+}: {
+  image?: string;
+  categoryIcon?: string;
+  name: string;
+}) {
+  const [imageError, setImageError] = useState(false);
+
+  const showImage = isImageUrl(image) && !imageError;
+
+  return (
+    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 sm:h-16 sm:w-16">
+      {showImage ? (
+        <img
+          src={image}
+          alt={name}
+          loading="lazy"
+          onError={() => setImageError(true)}
+          className="h-full w-full object-contain p-1"
+        />
+      ) : (
+        <span className="text-2xl" role="img" aria-label={name}>
+          {image || categoryIcon || "🛒"}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function BazarCompare() {
   const [mounted, setMounted] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -142,14 +185,11 @@ export default function BazarCompare() {
 
   const markets = selectedProduct?.markets ?? [];
 
-  const allMinimumPrices = markets.map((market) => market.min);
-  const allMaximumPrices = markets.map((market) => market.max);
-
   const lowestPrice =
-    allMinimumPrices.length > 0 ? Math.min(...allMinimumPrices) : 0;
+    markets.length > 0 ? Math.min(...markets.map((market) => market.min)) : 0;
 
   const highestPrice =
-    allMaximumPrices.length > 0 ? Math.max(...allMaximumPrices) : 0;
+    markets.length > 0 ? Math.max(...markets.map((market) => market.max)) : 0;
 
   const averagePrice =
     markets.length > 0 ? getAverage(lowestPrice, highestPrice) : 0;
@@ -185,7 +225,7 @@ export default function BazarCompare() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#f4f6f4] px-3 py-5 text-gray-800 sm:px-5 sm:py-7 lg:px-8 lg:py-8">
+      <div className="min-h-screen bg-[#f4f6f4] px-3 py-5 text-gray-800 sm:px-5 sm:py-7 lg:px-8">
         <div className="mx-auto max-w-5xl space-y-5">
           <div>
             <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
@@ -208,7 +248,7 @@ export default function BazarCompare() {
   return (
     <div className="min-h-screen overflow-x-clip bg-[#f4f6f4] px-3 py-5 text-gray-800 sm:px-5 sm:py-7 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-5xl space-y-5 sm:space-y-6">
-        <div>
+        <header>
           <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl">
             বাজার তুলনা
           </h1>
@@ -216,7 +256,7 @@ export default function BazarCompare() {
           <p className="mt-1 max-w-2xl text-xs leading-5 text-gray-500 sm:text-sm sm:leading-6">
             একটি পণ্য বেছে নিয়ে বিভিন্ন বাজারের দাম পাশাপাশি দেখুন।
           </p>
-        </div>
+        </header>
 
         {error && (
           <div
@@ -375,14 +415,14 @@ export default function BazarCompare() {
         {loading ? (
           <section className="space-y-5 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 shrink-0 animate-pulse rounded-full bg-gray-200" />
+              <div className="h-14 w-14 shrink-0 animate-pulse rounded-xl bg-gray-200" />
               <div className="min-w-0 flex-1">
                 <div className="h-5 w-36 max-w-full animate-pulse rounded bg-gray-200 sm:w-48" />
                 <div className="mt-2 h-3 w-48 max-w-full animate-pulse rounded bg-gray-100" />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div key={index} className="rounded-xl bg-gray-50 p-3.5 sm:p-4">
                   <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
@@ -394,20 +434,11 @@ export default function BazarCompare() {
         ) : selectedProduct ? (
           <section className="space-y-5 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm sm:space-y-6 sm:p-5 lg:p-6">
             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 sm:h-16 sm:w-16">
-                {selectedProduct.image ? (
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.nameBn}
-                    loading="lazy"
-                    className="h-full w-full object-contain p-1"
-                  />
-                ) : (
-                  <span className="text-2xl">
-                    {selectedProduct.categoryIcon || "🛒"}
-                  </span>
-                )}
-              </div>
+              <ProductImage
+                image={selectedProduct.image}
+                categoryIcon={selectedProduct.categoryIcon}
+                name={selectedProduct.nameBn}
+              />
 
               <div className="min-w-0 flex-1">
                 <h2 className="break-words text-base font-bold text-gray-800 sm:text-lg lg:text-xl">
@@ -429,7 +460,6 @@ export default function BazarCompare() {
                 <span className="block text-xs text-gray-500 sm:text-sm">
                   সর্বনিম্ন
                 </span>
-
                 <div className="mt-2 flex flex-wrap items-baseline gap-1">
                   <span className="break-words text-xl font-extrabold text-emerald-600 sm:text-2xl">
                     {toBengaliNumber(lowestPrice)}
@@ -442,7 +472,6 @@ export default function BazarCompare() {
                 <span className="block text-xs text-gray-500 sm:text-sm">
                   সর্বাধিক
                 </span>
-
                 <div className="mt-2 flex flex-wrap items-baseline gap-1">
                   <span className="break-words text-xl font-extrabold text-rose-500 sm:text-2xl">
                     {toBengaliNumber(highestPrice)}
@@ -455,7 +484,6 @@ export default function BazarCompare() {
                 <span className="block text-xs text-gray-500 sm:text-sm">
                   গড় দাম
                 </span>
-
                 <div className="mt-2 flex flex-wrap items-baseline gap-1">
                   <span className="break-words text-xl font-extrabold text-blue-600 sm:text-2xl">
                     {toBengaliNumber(averagePrice)}
@@ -468,7 +496,6 @@ export default function BazarCompare() {
                 <span className="block text-xs text-gray-500 sm:text-sm">
                   বাজার সংখ্যা
                 </span>
-
                 <div className="mt-2 text-xl font-extrabold text-gray-800 sm:text-2xl">
                   {toBengaliNumber(markets.length)}
                 </div>
@@ -529,7 +556,6 @@ export default function BazarCompare() {
                             <h4 className="break-words text-sm font-semibold text-gray-800 sm:text-base">
                               {market.market}
                             </h4>
-
                             <p className="mt-1 text-xs text-gray-500">
                               {market.division}
                             </p>
@@ -596,19 +622,15 @@ export default function BazarCompare() {
                             <td className="max-w-xs break-words px-5 py-4 font-medium text-gray-800">
                               {market.market}
                             </td>
-
                             <td className="px-5 py-4 text-gray-500">
                               {market.division}
                             </td>
-
                             <td className="whitespace-nowrap px-5 py-4 font-medium text-emerald-700">
                               {toBengaliNumber(market.min)} টাকা
                             </td>
-
                             <td className="whitespace-nowrap px-5 py-4 font-medium text-rose-600">
                               {toBengaliNumber(market.max)} টাকা
                             </td>
-
                             <td className="whitespace-nowrap px-5 py-4 text-right font-semibold text-gray-800">
                               {toBengaliNumber(average)} টাকা
                             </td>
