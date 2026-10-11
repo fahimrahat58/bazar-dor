@@ -13,7 +13,7 @@
 
 ## 📸 Project Screenshot
 
-![BazarDor Project Screenshot](./screenshots/bazar-dor.png)
+![BazarDor Project Screenshot](./Screenshot 2026-10-11 134219.png)
 
 ---
 
