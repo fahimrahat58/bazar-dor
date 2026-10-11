@@ -225,7 +225,7 @@ BazarDor uses a REST API for retrieving product, category, and market price info
 ### API Base URL
 
 ```text
-https://api.api-store.workers.dev/api/bazardor
+https://openapi.programming-hero.com/api/bazardor
 ```
 
 ### Main Endpoints
